@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="مبيعات">
+<title>💼 المبيعات — حساب الأسعار</title>
+<!-- Firebase REST API — no SDK needed, works on all devices including iOS file:// -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--gold:#eab308;--gold2:#ca8a04;--gold3:#a16207;--bg:#030712;--bg2:#111827;--bg3:#1f2937;--text:#f9fafb;--text2:#9ca3af;--text3:#6b7280;--border:#374151;--border-gold:rgba(234,179,8,0.4);}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Tahoma,Arial,sans-serif;min-height:100vh;min-height:-webkit-fill-available;direction:rtl;-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior-y:none;}
+html{height:-webkit-fill-available;}
+input,select,textarea,button{font-family:inherit;direction:rtl}
+.header{background:linear-gradient(to bottom,#111827,#030712);border-bottom:2px solid rgba(234,179,8,0.5);padding:20px 16px;text-align:center}
+.header h1{font-size:clamp(22px,5vw,34px);font-weight:900;background:linear-gradient(135deg,#fef08a,#eab308,#a16207);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:2px}
+.header p{color:var(--text3);font-size:11px;margin-top:4px;letter-spacing:2px}
+.deco{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:10px}
+.deco-line{height:1px;width:60px;background:linear-gradient(to left,#ca8a04,transparent)}
+.deco-line.r{background:linear-gradient(to right,#ca8a04,transparent)}
+.deco-dot{width:10px;height:10px;background:var(--gold);transform:rotate(45deg);box-shadow:0 0 12px rgba(234,179,8,0.6)}
+.tabs{display:flex;gap:4px;padding:10px 12px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:rgba(17,24,39,0.9);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:30;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
+.tab{flex:1;padding:10px;border-radius:12px;border:none;cursor:pointer;font-weight:900;font-size:13px;transition:all .2s;background:var(--bg3);color:var(--text2);-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+.tab.active{background:rgba(161,98,7,0.25);border:1px solid rgba(234,179,8,0.5);color:#fef08a}
+.tab:hover:not(.active){color:var(--text)}
+.content{max-width:900px;margin:0 auto;padding:16px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.inp{width:100%;background:var(--bg);border:2px solid rgba(161,98,7,0.3);border-radius:14px;padding:12px 16px;color:var(--text);font-size:16px;font-weight:600;outline:none;transition:border-color .2s;-webkit-appearance:none;-webkit-tap-highlight-color:transparent;}
+.inp:focus{border-color:var(--gold)}
+.inp:disabled{opacity:.4}
+select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23eab308' stroke-width='2' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 14px center;padding-left:36px;-webkit-appearance:none;appearance:none;}
+textarea.inp{resize:none;line-height:1.6}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.grid2{grid-template-columns:1fr}}
+.btn{border:none;border-radius:14px;padding:12px 20px;font-weight:900;font-size:14px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+.btn-gold{background:linear-gradient(135deg,#a16207,#eab308,#fef08a);color:#111;font-size:16px;width:100%;justify-content:center;border-radius:16px;padding:15px;box-shadow:0 4px 20px rgba(234,179,8,0.15)}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(234,179,8,0.25)}
+.btn-gold:active{transform:scale(.98)}
+.btn-green{background:rgba(20,83,45,0.5);border:1px solid rgba(34,197,94,0.4);color:#86efac;font-size:13px}
+.btn-green:hover{background:rgba(20,83,45,0.8)}
+.btn-blue{background:rgba(30,58,138,0.5);border:1px solid rgba(96,165,250,0.4);color:#93c5fd;font-size:13px}
+.btn-blue:hover{background:rgba(30,58,138,0.8)}
+.btn-yellow{background:rgba(120,53,15,0.4);border:1px solid rgba(234,179,8,0.4);color:#fde68a;font-size:13px}
+.btn-yellow:hover{background:rgba(120,53,15,0.7)}
+.btn-red{background:rgba(127,29,29,0.5);border:1px solid rgba(248,113,113,0.4);color:#fca5a5;font-size:12px;padding:6px 12px;border-radius:8px}
+.btn-red:hover{background:rgba(127,29,29,0.8)}
+.btn-gray{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.btn-gray:hover{background:#374151;color:var(--text)}
+.btn-purple{background:rgba(88,28,135,0.5);border:1px solid rgba(196,181,253,0.4);color:#c4b5fd;font-size:13px}
+.btn-purple:hover{background:rgba(88,28,135,0.8)}
+.btn-copy{background:rgba(20,83,45,0.4);border:1px solid rgba(34,197,94,0.35);color:#86efac;font-size:13px;width:100%;justify-content:center;margin-top:12px;padding:11px}
+.btn-copy:hover{background:rgba(20,83,45,0.7)}
+.btn-copy.copied{background:rgba(20,83,45,0.8);color:#4ade80}
+.flex-row{display:flex;gap:8px}
+.flex-row .btn{flex:1;justify-content:center}
+.card{background:var(--bg2);border:1px solid var(--border-gold);border-radius:20px;padding:16px;margin-bottom:14px}
+.card-header{font-size:18px;font-weight:900;color:#fde68a}
+.card-sub{font-size:11px;color:var(--text3);margin-top:3px}
+.result-header{background:linear-gradient(135deg,rgba(120,53,15,0.4),rgba(120,53,15,0.2));padding:20px;border-bottom:1px solid rgba(234,179,8,0.3)}
+.chip{display:inline-flex;align-items:center;background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:999px;padding:4px 12px;font-size:11px;font-weight:700}
+.chip-gold{background:rgba(120,53,15,0.3);border-color:rgba(234,179,8,0.4);color:#fde68a}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.breakdown-row{display:flex;justify-content:space-between;align-items:center;background:rgba(31,41,55,0.6);border-radius:12px;padding:12px 16px;margin-bottom:6px}
+.total-box{background:linear-gradient(135deg,rgba(120,53,15,0.4),rgba(120,53,15,0.2));border:1px solid rgba(234,179,8,0.4);border-radius:16px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+.total-amount{font-size:28px;font-weight:900;color:#fde68a}
+.alert{border-radius:12px;padding:12px 16px;font-size:13px;font-weight:700;margin-bottom:12px}
+.alert-red{background:rgba(127,29,29,0.4);border:1px solid rgba(248,113,113,0.4);color:#fca5a5}
+.alert-green{background:rgba(20,83,45,0.4);border:1px solid rgba(34,197,94,0.4);color:#86efac}
+.alert-orange{background:rgba(120,53,15,0.4);border:1px solid rgba(251,146,60,0.4);color:#fdba74}
+.period-card{background:var(--bg);border:1px solid rgba(161,98,7,0.35);border-radius:16px;padding:14px;margin-bottom:12px}
+.period-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.period-label{font-size:11px;font-weight:900;color:var(--gold2);letter-spacing:2px}
+.period-preview{margin-top:10px;background:rgba(120,53,15,0.2);border:1px solid rgba(161,98,7,0.25);border-radius:10px;padding:8px 12px;font-size:11px;color:#fde68a;font-weight:700}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.pill{background:var(--bg2);border:1px solid var(--border);color:var(--text3);border-radius:999px;padding:5px 12px;font-size:11px;font-weight:900;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+.pill:hover{border-color:rgba(161,98,7,0.6)}
+.pill.active{background:rgba(161,98,7,0.25);border-color:var(--gold);color:#fef08a;box-shadow:0 0 10px rgba(234,179,8,0.15)}
+.room-toggle{width:100%;display:flex;justify-content:space-between;align-items:center;padding:13px 16px;border-radius:16px;border:1px solid var(--border);background:rgba(17,24,39,0.7);color:var(--text2);font-weight:700;font-size:13px;cursor:pointer;margin-bottom:4px;text-align:right;transition:all .2s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+.room-toggle:hover{border-color:rgba(161,98,7,0.5);color:#fef08a}
+.room-toggle.open{background:rgba(120,53,15,0.2);border-color:rgba(234,179,8,0.5);color:#fef08a;border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom:none;margin-bottom:0}
+.room-body{background:rgba(17,24,39,0.4);border:1px solid rgba(234,179,8,0.4);border-top:none;border-bottom-left-radius:16px;border-bottom-right-radius:16px;padding:12px;margin-bottom:4px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;margin-left:8px}
+.dot-green{background:#4ade80}
+.dot-gray{background:var(--border)}
+.badge{font-size:10px;font-weight:900;background:rgba(20,83,45,0.4);border:1px solid rgba(34,197,94,0.3);color:#4ade80;border-radius:999px;padding:2px 8px}
+.arrow{font-size:16px;color:var(--gold2);transition:transform .2s;display:inline-block}
+.arrow.open{transform:rotate(180deg)}
+.tools-bar{background:rgba(17,24,39,0.7);border:1px solid rgba(161,98,7,0.25);border-radius:16px;padding:16px;margin-bottom:16px}
+.tools-title{font-size:11px;font-weight:900;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+.tools-btns{display:flex;flex-wrap:wrap;gap:8px}
+.tools-hint{font-size:11px;color:var(--text3);margin-top:10px;line-height:1.6}
+.notes-box{background:rgba(120,53,15,0.15);border:1px solid rgba(161,98,7,0.3);border-radius:14px;padding:14px;margin-bottom:16px}
+.notes-box p{font-size:11px;color:var(--text2);line-height:1.8;white-space:pre-line}
+.overlay{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.85);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.modal{background:var(--bg2);border:2px solid rgba(161,98,7,0.5);border-radius:24px;padding:32px;max-width:420px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.6)}
+.modal-wide{max-width:560px}
+.modal h3{font-size:18px;font-weight:900;color:#fde68a;margin-bottom:8px}
+.modal p{font-size:12px;color:var(--text3);margin-bottom:20px}
+.pw-icon{width:56px;height:56px;background:rgba(120,53,15,0.3);border:2px solid rgba(234,179,8,0.5);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 16px}
+.pw-input{width:100%;background:var(--bg);border:2px solid rgba(161,98,7,0.35);border-radius:14px;padding:14px;text-align:center;font-size:20px;letter-spacing:6px;color:var(--text);font-weight:900;outline:none;margin-bottom:6px;transition:border-color .2s;-webkit-appearance:none;}
+.pw-input:focus{border-color:var(--gold)}
+.pw-input.error{border-color:#ef4444}
+.footer{border-top:1px solid rgba(161,98,7,0.15);margin-top:40px;padding:30px 16px;padding-bottom:calc(30px + env(safe-area-inset-bottom));text-align:center}
+.footer-name{color:#fde68a;font-size:15px;font-weight:900;letter-spacing:1px;margin:6px 0}
+.empty{display:flex;flex-direction:column;align-items:center;padding:60px 0;color:var(--text3)}
+.empty span{font-size:60px;margin-bottom:16px}
+.empty p{font-size:14px;font-weight:900;color:#4b5563}
+.empty small{font-size:11px;margin-top:4px}
+.sec-label{font-size:11px;font-weight:900;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;display:block}
+.hotel-info{background:var(--bg2);border:1px solid rgba(161,98,7,0.35);border-radius:16px;padding:14px;margin-bottom:14px}
+.hotel-info-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}
+.rooms-badge{font-size:11px;background:rgba(120,53,15,0.25);border:1px solid rgba(161,98,7,0.35);color:#fde68a;border-radius:999px;padding:3px 10px;font-weight:700;white-space:nowrap}
+input[type=date],input[type=text],input[type=number],input[type=password]{font-size:16px !important;} /* prevent iOS zoom */
+input[type=date]::-webkit-calendar-picker-indicator{filter:invert(0.5) sepia(1) saturate(5) hue-rotate(5deg);cursor:pointer}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.shake{animation:shake .5s ease}
+/* room name edit inline */
+.room-name-wrap{display:flex;align-items:center;gap:6px;flex:1}
+.room-edit-inp{background:transparent;border:none;border-bottom:1px solid var(--gold2);color:#fef08a;font-size:13px;font-weight:700;outline:none;padding:2px 4px;width:100%}
+/* danger zone */
+.danger-zone{background:rgba(127,29,29,0.2);border:1px solid rgba(248,113,113,0.3);border-radius:14px;padding:14px;margin-bottom:16px}
+.danger-title{font-size:11px;font-weight:900;color:#fca5a5;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+/* room list in modal */
+.room-list-item{display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:6px}
+.room-list-item span{font-size:13px;color:var(--text2);font-weight:600}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="deco">
+    <div class="deco-line"></div>
+    <div class="deco-dot"></div>
+    <div class="deco-line r"></div>
+  </div>
+  <div style="display:inline-block;background:rgba(30,58,138,0.35);border:1px solid rgba(96,165,250,0.5);border-radius:999px;padding:3px 16px;font-size:10px;font-weight:900;color:#93c5fd;letter-spacing:3px;margin-bottom:8px">💼 نسخة المبيعات</div>
+  <h1>إدارة أسعار الفنادق</h1>
+  <p>Sales Edition — Booking Calculator</p>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" id="tabCalc" onclick="switchTab('calc')">🧮 حساب الحجز</button>
+  <button class="tab" id="tabReports" onclick="switchTab('reports')">📊 تقارير المبيعات</button>
+</div>
+
+<div class="content">
+  <div id="pageCalc" style="display:block"></div>
+  <div id="pageReports" style="display:none"></div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="deco">
+    <div class="deco-line" style="width:40px"></div>
+    <div class="deco-dot" style="width:6px;height:6px"></div>
+    <div class="deco-line r" style="width:40px"></div>
+  </div>
+  <p style="font-size:10px;color:var(--gold3);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">فكرة وتنفيذ</p>
+  <p class="footer-name">مستر أحمد جلال</p>
+  <p style="font-size:11px;color:var(--text3);margin-top:8px">جميع الحقوق محفوظة © <span id="yr"></span></p>
+</div>
+
+<!-- ══════════ MODALS ══════════ -->
+
+<!-- Reset -->
+<div class="overlay" id="overlayReset" style="display:none">
+  <div class="modal">
+    <span style="font-size:48px">⚠️</span>
+    <h3 style="color:#fca5a5;margin-top:12px">تأكيد إعادة التعيين</h3>
+    <p>سيتم حذف جميع الأسعار والفترات والملاحظات والفنادق المضافة. هل أنت متأكد؟</p>
+    <div class="flex-row">
+      <button class="btn btn-red" style="flex:1;justify-content:center;font-size:14px;padding:12px" onclick="doReset()">نعم، إعادة التعيين</button>
+      <button class="btn btn-gray" style="flex:1;justify-content:center;font-size:14px;padding:12px" onclick="closeModal('overlayReset')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Password -->
+<div class="overlay" id="overlayPw" style="display:none">
+  <div class="modal" id="pwModal">
+    <div class="pw-icon">🔐</div>
+    <h3>إدارة الأسعار</h3>
+    <p>هذه الميزة متاحة في نسخة الأوبريشن فقط</p>
+    <input class="pw-input" id="pwInput" type="password" placeholder="••••" onkeydown="if(event.key==='Enter')checkPw()">
+    <div id="pwErr" style="display:none;margin-top:8px" class="alert alert-red">❌ كلمة المرور غير صحيحة</div>
+    <div class="flex-row" style="margin-top:14px">
+      <button class="btn btn-gold" style="flex:1;font-size:14px;padding:12px" onclick="checkPw()">دخول</button>
+      <button class="btn btn-gray" style="flex:1;justify-content:center;font-size:14px;padding:12px" onclick="closeModal('overlayPw')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change Password -->
+<div class="overlay" id="overlayChangePw" style="display:none">
+  <div class="modal" style="text-align:right">
+    <h3 style="text-align:center;margin-bottom:20px">🔑 تغيير كلمة المرور</h3>
+    <div class="field"><label>كلمة المرور الحالية</label><input class="inp" type="password" id="cpCurrent" placeholder="••••"></div>
+    <div class="field"><label>كلمة المرور الجديدة</label><input class="inp" type="password" id="cpNew" placeholder="••••"></div>
+    <div class="field"><label>تأكيد كلمة المرور الجديدة</label><input class="inp" type="password" id="cpConfirm" placeholder="••••"></div>
+    <div id="cpMsg" style="display:none" class="alert"></div>
+    <div class="flex-row" style="margin-top:8px">
+      <button class="btn btn-gold" style="flex:1;font-size:14px;padding:12px" onclick="doChangePw()">حفظ</button>
+      <button class="btn btn-gray" style="flex:1;justify-content:center;font-size:14px;padding:12px" onclick="closeModal('overlayChangePw')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Hotel -->
+<div class="overlay" id="overlayAddHotel" style="display:none">
+  <div class="modal modal-wide" style="text-align:right">
+    <h3 style="text-align:center;margin-bottom:4px">🏨 إضافة فندق جديد</h3>
+    <p style="text-align:center;margin-bottom:20px">أدخل بيانات الفندق والغرف</p>
+    <div class="field"><label>اسم الفندق</label><input class="inp" id="nhName" placeholder="مثال: Marriott Downtown Cairo"></div>
+    <div class="grid2">
+      <div class="field">
+        <label>المنطقة (موجودة)</label>
+        <select class="inp" id="nhRegionSel" onchange="syncRegionSel()">
+          <option value="">— اختر منطقة موجودة —</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>أو أدخل منطقة جديدة</label>
+        <input class="inp" id="nhRegionNew" placeholder="مثال: الساحل الشمالي" oninput="syncRegionInp()">
+      </div>
+    </div>
+    <div class="field"><label>ملاحظات الفندق</label><textarea class="inp" id="nhNotes" rows="3" placeholder="• الإفطار 20$ للفرد&#10;• سياسة الإلغاء..."></textarea></div>
+    <div class="field">
+      <label>الغرف (أضف الغرف واحدة بواحدة)</label>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <input class="inp" id="nhRoomInp" placeholder="اسم الغرفة..." style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();addRoomToList()}">
+        <button class="btn btn-yellow" style="white-space:nowrap;padding:10px 16px" onclick="addRoomToList()">+ إضافة</button>
+      </div>
+      <div id="nhRoomList" style="max-height:180px;overflow-y:auto"></div>
+    </div>
+    <div id="nhMsg" style="display:none" class="alert"></div>
+    <div class="flex-row" style="margin-top:8px">
+      <button class="btn btn-gold" style="flex:1;font-size:14px;padding:12px" onclick="saveNewHotel()">✓ حفظ الفندق</button>
+      <button class="btn btn-gray" style="flex:1;justify-content:center;font-size:14px;padding:12px" onclick="closeModal('overlayAddHotel')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Hotel Rooms -->
+<div class="overlay" id="overlayEditHotel" style="display:none">
+  <div class="modal modal-wide" style="text-align:right">
+    <h3 style="text-align:center;margin-bottom:4px">✏️ تعديل الفندق</h3>
+    <p style="text-align:center;margin-bottom:16px" id="editHotelSubtitle"></p>
+    <div class="field"><label>اسم الفندق</label><input class="inp" id="ehName" placeholder="اسم الفندق"></div>
+    <div class="field"><label>المنطقة</label><input class="inp" id="ehRegion" placeholder="المنطقة"></div>
+    <div class="field">
+      <label>الغرف الحالية (اسحب لإعادة الترتيب — اضغط ✕ للحذف)</label>
+      <div id="ehRoomList" style="max-height:220px;overflow-y:auto;margin-bottom:8px"></div>
+      <div style="display:flex;gap:8px">
+        <input class="inp" id="ehRoomInp" placeholder="اسم غرفة جديدة..." style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();addRoomToEditList()}">
+        <button class="btn btn-yellow" style="white-space:nowrap;padding:10px 16px" onclick="addRoomToEditList()">+ إضافة</button>
+      </div>
+    </div>
+    <div id="ehMsg" style="display:none" class="alert"></div>
+    <div class="flex-row" style="margin-top:8px">
+      <button class="btn btn-gold" style="flex:1;font-size:14px;padding:12px" onclick="saveEditHotel()">✓ حفظ التعديلات</button>
+      <button class="btn btn-gray" style="flex:1;justify-content:center;font-size:14px;padding:12px" onclick="closeModal('overlayEditHotel')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- no blocking overlay — Firebase loads silently -->
+
+<input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(this)">
+
+<script>
+// ═══════════════════════════════════════════════════
+// BUILT-IN HOTELS (read-only base)
+// ═══════════════════════════════════════════════════
+const BASE_HOTELS=[
+{id:0,name:"ST Regis",region:"وسط البلد · 5 ⭐",notes:"• الإفطار 20$ للفرد\n• الشخص الثالث إضافة 50$ في الليلة\n• 4 أفراد في سويت الغرفتين | 6 أفراد في سويت الثلاث غرف\n• أي فرد زيادة 50$ في الليلة\n• تغريم ليلة إضافية في حالة مغادرة العميل قبل موعد خروجه",rooms:[{n:"Superior Room 45m (City View)"},{n:"Deluxe Room 45m (Partial Nile View)"},{n:"Astor Room 45m (Full Nile View)"},{n:"Grand Deluxe Room 63m (Partial Nile)"},{n:"Metropolitan Suite 66M (Partial Nile)"},{n:"Astor Suite 80m (Full Nile)"},{n:"ST Regis Suite 94m (Full Nile)"},{n:"Capital Two Bedrooms (Partial Nile)"},{n:"Sky Two Bedrooms (Full Nile)"},{n:"ST Regis Two Bedrooms (Full Nile)"},{n:"City Three Bedrooms (City View)"},{n:"Capital Three Bedrooms (Partial Nile)"},{n:"Sky Three Bedrooms (Full Nile)"},{n:"ST Regis Three Bedrooms (Full Nile)"}]},
+{id:1,name:"Fourseasons Nile Plaza",region:"وسط البلد · 5 ⭐",notes:"• الإفطار 25$ للفرد\n• الفرد الثالث 60$\n• تغريم ليلة في حالة الإلغاء قبل الوصول بثلاثة أيام",rooms:[{n:"Superior Room (Citadel View)"},{n:"Deluxe Room Balcony (Citadel & pool view)"},{n:"Nile View With Balcony Room"},{n:"Grand Nile View Room"},{n:"Corniche Suite (Nile View)"},{n:"Fourseasons Ex. Suite (Nile View)"},{n:"Diplomatic Suite (Nile View)"},{n:"Premium Superior Room (Citadel View)"},{n:"Pool View Rooms With Terrace"},{n:"Premium DLX Room Balcony (Citadel & pool)"},{n:"Premium Nile View With Balcony Room"},{n:"Suite Pool View With Terrace"},{n:"Premium Corniche Suite"},{n:"Premium Fourseasons Ex. Suite (Nile View)"},{n:"Premium Diplomatic Suite (Nile View)"}]},
+{id:2,name:"Ritz Carlton",region:"وسط البلد · 5 ⭐",notes:"• الإفطار 25$ للفرد\n• الشخص التالت يزيد 60$\n• تغريم ليلة إضافية في حالة الخروج المبكر لأي حجز 5 ليالي وأكثر",rooms:[{n:"Deluxe Room (Museum View)"},{n:"Deluxe Room Balcony (Museum view)"},{n:"Deluxe Nile Room"},{n:"Deluxe Nile Room With Balcony"},{n:"Club Room (City View) With Lounge"},{n:"Club Room (Nile View) With Lounge"},{n:"City Suite"},{n:"Ex. Suite (Nile View)"},{n:"Ritz Carlton Suite (Nile View)"}]},
+{id:3,name:"Four Seasons First Residence (CAF)",region:"وسط البلد · 5 ⭐",notes:"• الإفطار 20$ للفرد\n• الغرف الكونكت متاحة في البريمير فقط\n• تغريم ليلة قبل الوصول بثلاثة أيام (عدا العيد والفترات المزدحمة: 7 أيام مسبقاً)",rooms:[{n:"Superior (City & Pyramids view) Large/twin"},{n:"Deluxe Room (Partial Nile) Large bed only"},{n:"Premier RM (City & Pyramids) Large bed only"},{n:"Premier RM (Nile view) Large/Twin"},{n:"City Suite"},{n:"Premium Suite"},{n:"Diplomatic Suite"},{n:"Fourseasons Suite"},{n:"Premium Deluxe Suite"}]},
+{id:4,name:"Sheraton Cairo",region:"وسط البلد · 5 ⭐",notes:"• الإفطار 20$ للفرد\n• Sup Premium Partial Nile — إضافة 20$\n• Sup Smart Room — إضافة 30$",rooms:[{n:"DLX Room (City or Pool view) South Bldg"},{n:"Club Room with lounge (South Building)"},{n:"Corner Suite with lounge 63m (South)"},{n:"Ex. Suite with lounge 84m (South)"},{n:"Ambassador suite with lounge 138m"},{n:"Nile View Room (North Building)"},{n:"Panorama Nile Room with lounge (North)"},{n:"Nile Suite with lounge (North)"},{n:"Panorama Nile Suite with lounge (North)"},{n:"Family Suite (4 Pax) Pool & Nile View (North)"}]},
+{id:5,name:"Marriott Zamalek",region:"وسط البلد · 5 ⭐",notes:"• مراجعة العقد وإضافة 10$ عند البيع",rooms:[{n:"جميع الأنواع"}]},
+{id:6,name:"Fairmont Nile City",region:"وسط البلد · 5 ⭐",notes:"• الإفطار 20$ للفرد\n• زيادة 50$ على جنسيات (تونسي / عراقي / جزائري / أردني)\n• إلغاء مجاني حتى الساعة 12 ظهراً يوم الوصول\n• One Step Upgrade",rooms:[{n:"Fairmont Room (City View)"},{n:"Deluxe Room (Partial Nile View)"},{n:"Deluxe Nile Room (Full Nile View)"},{n:"Gold Room (Partial Nile) With Lounge"},{n:"Gold Nile Room (Full Nile) With Lounge"},{n:"Signature Room (Full Nile) Balcony/Lounge"},{n:"Nile Suite (Full Nile) BB Only"},{n:"Nile Suite (Full Nile) With Lounge"},{n:"DLX Nile Suite (Dining RM) BB Only"},{n:"DLX Nile Suite (Dining RM) With Lounge"}]},
+{id:7,name:"Kempinski Nile",region:"وسط البلد · 5 ⭐",notes:"• الإفطار 20$ للفرد\n• رجاء مراجعة سياسة الإلغاء مع كل حجز",rooms:[{n:"DLX Room (City View)"},{n:"Superior Nile (Twin Beds)"},{n:"DLX Nile Room (Large Bed)"},{n:"Madinah Junior Suite (City) Lounge"},{n:"Nile Junior Suite (Nile) Lounge"},{n:"Madinah DLX Suite (City) Lounge"},{n:"Nile DLX Suite (Nile) Lounge"}]},
+{id:8,name:"Sofitel Cairo Downtown Nile",region:"وسط البلد · 5 ⭐",notes:"• الإفطار 25$ للفرد\n• خصم 10$ للحجز 4 ليالي وأكثر",rooms:[{n:"Classic Room"},{n:"Deluxe Room Nile View"},{n:"Luxury Room Panoramic Nile View"},{n:"Executive Room"},{n:"Prestige Suite Nile View"},{n:"Opera Suite Nile View"}]},
+{id:9,name:"Sofitel Elgezirah",region:"وسط البلد · 5 ⭐",notes:"• الإفطار 20$ للفرد\n• تغريم ليلة في حالة الإلغاء قبل الوصول بثلاثة أيام",rooms:[{n:"Premium Room"},{n:"Luxury Room"},{n:"Manificio Room"},{n:"Luxury Club Room (With Lounge)"},{n:"Prestige Suite (With Lounge)"},{n:"Prestige Panorama Suite (Lounge)"},{n:"Opera Suite (With Lounge)"},{n:"Imperial Suite (With Lounge)"}]},
+{id:10,name:"Semiramis (IHG)",region:"وسط البلد · 5 ⭐",notes:"• الإفطار 20$ للفرد\n• تغريم ليلة للإلغاء قبل الوصول بيوم\n• يجب إرسال صورة جواز سفر العميل مع الحجز",rooms:[{n:"Classic Room (City View)"},{n:"Classic Nile Room (Nile View)"},{n:"DLX Room (City View)"},{n:"DLX Nile Room (Nile View)"},{n:"Club City Room with Lounge"},{n:"Club Nile Room with Lounge"},{n:"Ex. Suite With Lounge"},{n:"Nile Suite With Lounge"},{n:"Presidential Suite With Lounge"}]},
+{id:11,name:"Hilton Grand Nile Tower (GCC)",region:"وسط البلد · 5 ⭐",notes:"• الإفطار 15$ للفرد\n• أبجريد مجاني للإكزيكتيف لاونج بيزيد 20$",rooms:[{n:"Guest Room"},{n:"Guest Room High Floor"},{n:"Corner Guest Room"},{n:"One Bedroom Suite With Lounge"},{n:"Corner One Bedroom Suite"}]},
+{id:12,name:"Hilton Grand Nile Tower (All Markets)",region:"وسط البلد · 5 ⭐",notes:"• الأسعار شاملة الإفطار",rooms:[{n:"Guest Room"},{n:"Guest Room High Floor"},{n:"Corner Guest Room"},{n:"Executive Room With Lounge"},{n:"One Bedroom Suite With Lounge"},{n:"Corner One Bedroom Suite"}]},
+{id:13,name:"Ramses Hilton",region:"وسط البلد · 5 ⭐",notes:"• الإفطار 15$ للفرد\n• سبليمنت التربل: الغرف 40$ / السويتات 60$\n• تغريم ليلة للإلغاء قبل الوصول بيوم",rooms:[{n:"Standard Room (City View)"},{n:"Standard Nile Room"},{n:"Corner Room (City View)"},{n:"Corner Room (Nile View)"},{n:"DLX Room (City View)"},{n:"DLX Room (Nile View)"},{n:"EX. Room (City View)"},{n:"EX. Room (Nile View)"},{n:"Ambassador Nile Suite"},{n:"Imperial Nile View"},{n:"Panorama Suite"},{n:"Diwan Suite"}]},
+{id:14,name:"Hilton Maadi",region:"وسط البلد · 5 ⭐",notes:"• الإفطار 20$ للفرد\n• تغريم ليلة في حالة الإلغاء قبل الوصول بيومين",rooms:[{n:"Guest Room"},{n:"Premium Partial Nile Room"},{n:"Premium Partial Nile With Balcony"},{n:"Executive City View Room"},{n:"Executive Partial Nile View Room"},{n:"One Bedroom Nile Suite"},{n:"Grand One Bedroom Pyramids & Nile Suite"},{n:"Royal Suite"}]},
+{id:15,name:"Steigenberger Eltahrir",region:"وسط البلد · 4 ⭐",notes:"• الإفطار 15$ للفرد\n• مميزات الديلوكس: فاكهة وكوكيز يومياً، ميني بار مجاناً\n• يوجد سعر خاص للميدل إيست شامل الإفطار — مراجعة الأوبريشن",rooms:[{n:"Standard Room (City View)"},{n:"Pool View Room"},{n:"Deluxe Room (City View)"},{n:"Partial Nile View Room"},{n:"Junior Suite (City View)"},{n:"Capital Suite"}]},
+{id:16,name:"Hilton El-Zamalek",region:"وسط البلد · 4 ⭐",notes:"• شامل الإفطار\n• غرامة ليلة للإلغاء قبل الوصول بيومين\n• الحجز غير المسترد أقل بـ 10$",rooms:[{n:"Hilton Guest Room (City View)"},{n:"Guest Plus Room Partial Nile View"},{n:"DLX Room (Twin Bed) Partial Nile View"},{n:"DLX Room (Large Bed) Partial Nile View"},{n:"Nile Suite (Two BedRooms) 4 Pax"},{n:"Ambassador Suite (Three Bedrooms) 6 Pax"},{n:"Presidential Suite (Villa) 7 Pax"}]},
+{id:17,name:"World Trade Center",region:"وسط البلد · 4 ⭐",notes:"• الإفطار 10$ للفرد\n• يوجد خصم في الأسعار — مراجعة الأوبريشن\n• السويتات المجددة يضاف 100$ في الليلة",rooms:[{n:"Regent Suite (2 Bedrooms) City View 4Pax"},{n:"Royal Cairo Suite (2 Bedrooms) City 4Pax"},{n:"Royal Nile Suite (2 Bedrooms) Nile 4Pax"},{n:"Imperial Suite (3 Bedrooms) Nile 4Pax"}]},
+{id:18,name:"Holiday Inn Maadi",region:"وسط البلد · 4 ⭐",notes:"• الإفطار 20$ للفرد",rooms:[{n:"City View Room"},{n:"Nile View Room"},{n:"DLX Nile Suite"}]},
+{id:19,name:"Holiday Inn Apartments (Maadi)",region:"وسط البلد · 4 ⭐",notes:"• الإفطار 15$ للفرد\n• غرامة ليلة للإلغاء قبل الوصول بيوم",rooms:[{n:"Studio Suite 62m (City View)"},{n:"Studio Suite 52m (Nile View)"},{n:"One Bedroom Suite 87m (City View)"},{n:"One Bedroom Suite 67m (Nile View)"},{n:"Family Suite 120m (Nile View)"}]},
+{id:20,name:"Novotel Elborg",region:"وسط البلد · 4 ⭐",notes:"• شامل الإفطار\n• الشخص الثالث إضافة 35$",rooms:[{n:"Standard Room (City View)"},{n:"Standard Room (Nile View)"},{n:"Junior Suite (Nile View)"},{n:"Superior Suite (Nile View)"}]},
+{id:21,name:"Safir Cairo",region:"وسط البلد · 4 ⭐",notes:"• بالإفطار",rooms:[{n:"Standard Room"},{n:"DLX Room"},{n:"EX. Room"}]},
+{id:22,name:"Cairo Taj",region:"وسط البلد · 4 ⭐",notes:"• بالإفطار",rooms:[{n:"Standard Room (Large Bed)"},{n:"DLX Room (Large/Twin Bed)"},{n:"DLX Room With Standard (Connect)"},{n:"Superior Room (Large/Twin Bed)"},{n:"Superior Room With Standard (Connect)"},{n:"Junior Suite"},{n:"Silver Suite (One Bedroom)"},{n:"Golden Suite (Two Bedrooms)"},{n:"Royal Apartment (6 Pax)"}]},
+{id:23,name:"Cairo Taj Mohandeseen",region:"وسط البلد · 4 ⭐",notes:"• بدون إفطار",rooms:[{n:"Classic Room Twin Beds"},{n:"Premium Room Large Bed"},{n:"Luxury Room Twin Beds"},{n:"Ex. Suite Large Bed Front View"}]},
+{id:24,name:"Pyramisa Cairo",region:"وسط البلد · 4 ⭐",notes:"• يطبق سعر الفندق",rooms:[{n:"STD Room"},{n:"DLX Room"},{n:"Premium Room"},{n:"One Bedroom Premium Suite"},{n:"Two Bedroom Premium Suite"}]},
+{id:25,name:"Concorde Elsalam Hotel",region:"وسط البلد · 4 ⭐",notes:"• الإفطار 15$ للفرد",rooms:[{n:"Superior Room Garden View"},{n:"Superior Room Pool View"},{n:"Premier Renovated Room"},{n:"Premier Renovated Room Pool View"}]},
+{id:26,name:"Waldorf Austria",region:"مدينة نصر · التجمع",notes:"• الإفطار 20$ للفرد\n• الغرف المتصلة إضافة 30$ في الليلة\n• تغريم ليلة للإلغاء قبل الوصول بليلتين",rooms:[{n:"DLX Room"},{n:"Premier Room"},{n:"Premier Pool View Room"},{n:"Premier Pool View With Terrace"},{n:"Premier Room With Garden View"},{n:"Club Room"},{n:"Superior Suite One Bedroom"},{n:"DLX Suite One Bedroom"},{n:"DLX Suite One Bedroom With Balcony"},{n:"Premier Suite One Bedroom"}]},
+{id:27,name:"Hilton Heliopolis",region:"مدينة نصر · التجمع",notes:"• الإفطار 15$ للفرد",rooms:[{n:"Guest Room"},{n:"Guest Room Pool View"},{n:"Ex. Room City View"},{n:"EX. Room Pool View"},{n:"One Bedroom Suite Pool View"},{n:"EX. Suite Pool View"}]},
+{id:28,name:"Radisson Blu",region:"مدينة نصر · التجمع",notes:"• بالإفطار\n• يطبق سعر الفندق",rooms:[{n:"Superior Room"},{n:"EX. Room"},{n:"Junior Suite"},{n:"EX. Suite"},{n:"Diplomatic Suite"}]},
+{id:29,name:"Radisson Blu Apartments",region:"مدينة نصر · التجمع",notes:"• بالإفطار (أكتوبر 7 – نوفمبر 1)\n• خصم للفترات الطويلة من 7 ليالي — مراجعة الأوبريشن\n• الفرد الزيادة 30$ في الليلة",rooms:[{n:"One Bedroom Apartment 2pax"},{n:"One Bedroom Superior Apartment 2pax"},{n:"One Bedroom Pool Apartment 2pax"},{n:"Two Bedrooms Apartment 4pax"},{n:"Two Bedrooms Pool Apartment 4pax"},{n:"Three Bedrooms Apartment 6pax"}]},
+{id:30,name:"Royal Maxim Kempinski",region:"مدينة نصر · التجمع",notes:"• بالإفطار\n• Non-Refundable",rooms:[{n:"DLX Room City View BB"},{n:"DLX Room Pool View BB"},{n:"Royal Club City View With Lounge"},{n:"Royal Club Pool View With Lounge"},{n:"Maxim Suite With Lounge"}]},
+{id:31,name:"JW Marriott",region:"مدينة نصر · التجمع",notes:"• الإفطار 25$ للفرد\n• Non-Refundable",rooms:[{n:"DLX Room Golf Or Pool View"},{n:"Direct Pool View Room"},{n:"EX. Room Golf Or Pool View With Lounge"},{n:"Junior Suite One Bedroom With Lounge"},{n:"Two Bedrooms Suite With Lounge"}]},
+{id:32,name:"Intercontinental City Stars Hotel",region:"مدينة نصر · التجمع",notes:"• بدون إفطار في الكلاسيك والبريميم (إضافة 20$ للفرد)\n• الكلوب بالإفطار — للسنجل يقل 15$\n• التمديد ليلة بليلة يضاف 20$",rooms:[{n:"Classic Room Renovated (BO)"},{n:"Premium Room Renovated (BO)"},{n:"Club Room With Lounge Renovated"},{n:"One Bedroom Suite (Main Building)"},{n:"One Bedroom Suite With Kitchen"},{n:"Diplomatic Suite"},{n:"Junior Suite"},{n:"Signature Suite One Bedroom"},{n:"Signature Suite Two Bedroom"}]},
+{id:33,name:"IHG City Stars Residence (Apartments)",region:"مدينة نصر · التجمع",notes:"• بالإفطار\n• خصم 10$ للحجز (4–16) ليلة\n• خصم 20$ للحجز (15–29) ليلة\n• خصم 30$ للحجز (+30) ليلة",rooms:[{n:"Studio Suite"},{n:"One Bedroom Suite (2 Pax)"},{n:"Two Bedrooms Suite (4 Pax)"},{n:"Three Bedrooms Suite (6 Pax)"},{n:"Pent House"}]},
+{id:34,name:"Stay Bridge Apartments",region:"مدينة نصر · التجمع",notes:"• بالإفطار\n• خصم 10$ للحجز (4–16) ليلة\n• خصم 20$ للحجز (15–29) ليلة\n• خصم 30$ للحجز (+30) ليلة",rooms:[{n:"Studio Suite"},{n:"One Bedroom Standard Suite"},{n:"One Bedroom EX. Suite"},{n:"Two Bedrooms Standard Suite"},{n:"Two Bedrooms EX. Suite"},{n:"Three Bedrooms DLX Suite"},{n:"Penthouse Two Bedrooms"},{n:"Penthouse Three Bedrooms"}]},
+{id:35,name:"Holiday Inn City Stars",region:"مدينة نصر · التجمع",notes:"• الإفطار 15$ للفرد\n• سعر السويت يشمل الإفطار",rooms:[{n:"Standard Room"},{n:"Premium Room"},{n:"One Bedroom Suite"}]},
+{id:36,name:"Sonesta Tower",region:"مدينة نصر · التجمع",notes:"• بالإفطار\n• لا يسري للحجز أكثر من 3 ليالي — للحجز بدون إفطار خصم 3$ للفرد\n• خصم 5$ للحجز الغير قابل للإلغاء (لا يقل عن ليلتين)",rooms:[{n:"Standard Room"},{n:"DLX Room"},{n:"Patio Tower Room"},{n:"EX. Room"},{n:"Junior Suite"},{n:"DLX Suite"}]},
+{id:37,name:"Truimph Luxury",region:"مدينة نصر · التجمع",notes:"• بالإفطار\n• للحجز بدون إفطار خصم 10$ للفرد",rooms:[{n:"DLX Room City"},{n:"DLX Room Pool"},{n:"Grand DLX Room City"},{n:"Grand DLX Room Pool"},{n:"Pool Cabin"},{n:"Premium Room"},{n:"Junior Suite"},{n:"Ambassador Suite"},{n:"Family Suite"}]},
+{id:38,name:"Tolip Golden Plaza (Gewan)",region:"مدينة نصر · التجمع",notes:"• بالإفطار\n• السرير الإضافي 20$ في الليلة\n• الأسعار للخليجي والميدل إيست",rooms:[{n:"Superior Room"},{n:"DLX Room"},{n:"Pool Cabinet"},{n:"Junior Suite"},{n:"EX. Suite"}]},
+{id:39,name:"Tolip Gardens",region:"مدينة نصر · التجمع",notes:"• بالإفطار\n• الأسعار للخليجي والميدل إيست",rooms:[{n:"Superior Room"}]},
+{id:40,name:"Crowne Plaza West Cairo Arakan",region:"أكتوبر · الجيزة",notes:"• الإفطار 20$ للفرد\n• الشخص الثالث يزيد 20$\n• سرير إضافي 20$\n• إفطار مجاني للحجوزات الكلوب والسويتات",rooms:[{n:"Standard Room"},{n:"Club Room"},{n:"Junior Suite"},{n:"Premium Suite"},{n:"Club Junior Suite"},{n:"Club Premium Suite"}]},
+{id:41,name:"Giza Palace",region:"أكتوبر · الجيزة",notes:"• الإفطار 25$ للفرد",rooms:[{n:"DLX Room"},{n:"Club Room (Lounge)"},{n:"Ex. Room (Lounge)"},{n:"Club Suite (Lounge)"},{n:"Ex. Suite (Lounge)"}]},
+{id:42,name:"Hyatt Regency West Cairo",region:"أكتوبر · الجيزة",notes:"• الإفطار 15$ للفرد\n• يوجد سعر خاص للميدل إيست — مراجعة الأوبريشن",rooms:[{n:"Standard Room"},{n:"DLX Room"},{n:"Pyramids View Room"},{n:"Spa Room"},{n:"Regency Suite"},{n:"Regency Ex. Suite"}]},
+{id:43,name:"Hyatt Centric West Cairo",region:"أكتوبر · الجيزة",notes:"• الإفطار 15$ للفرد\n• يوجد سعر خاص للميدل إيست — مراجعة الأوبريشن",rooms:[{n:"Standard Room City View"},{n:"Standard Room Pool View"},{n:"Standard Room Pyramids View"},{n:"One Bed Room Suite"},{n:"One Bed Room DLX Suite"},{n:"One Bed Room Suite With Balcony"},{n:"One Bed Room Premium Suite"}]},
+{id:44,name:"Hilton Pyramids Golf",region:"أكتوبر · الجيزة",notes:"• الإفطار 15$ للفرد",rooms:[{n:"Standard Room"},{n:"Superior Renovated Room"},{n:"Executive Room"},{n:"Junior Suite"},{n:"DLX Suite"},{n:"Presidential"}]},
+];
+
+const STORAGE_KEY='hotel_sales_prices_v1';
+const HOTELS_KEY='hotel_sales_custom_v1';
+const PW_KEY='hotel_sales_pw_v1';
+const DEFAULT_PW='1234';
+
+// ── HOTELS list (base + custom) ──
+let HOTELS=[...BASE_HOTELS];
+let customHotels=[];   // extra hotels added by user
+let hotelRooms={};     // overrides for room lists per hotelId (for editing base hotels rooms)
+
+function loadHotels(){
+  // Online-only: hotels come from Firebase only, not localStorage
+  rebuildHotels();
+}
+function rebuildHotels(){
+  HOTELS=BASE_HOTELS.map(h=>{
+    if(hotelRooms[h.id]){
+      return {...h,
+        name:hotelRooms[h.id].name||h.name,
+        region:hotelRooms[h.id].region||h.region,
+        rooms:hotelRooms[h.id].rooms||h.rooms
+      };
+    }
+    return h;
+  }).concat(customHotels);
+}
+function saveHotels(){
+  // Online-only: no localStorage save — data comes from Firebase only
+  rebuildHotels();
+}
+
+// ── STATE ──
+let DB={};
+let adminUnlocked=false;
+let currentTab='calc';
+let cHotelId='',cRoomIdx='',cCheckIn='',cCheckOut='',cClient='',cCommission=0,cCommType='pct'; // pct | usd | egp
+let aHotelId='',aRegion='',aExpanded={};
+// new hotel modal rooms temp list
+let nhRooms=[];
+// edit hotel modal rooms temp list
+let ehRooms=[];
+let ehHotelId=null;
+
+function loadDB(){return buildFresh();} // Online-only: prices come from Firebase only
+function buildFresh(){const d={};HOTELS.forEach(h=>{d[h.id]={};h.rooms.forEach((_,i)=>{d[h.id][i]={periods:[],notes:h.notes||''};});});return d;}
+function save(){} // Online-only: no localStorage save for prices
+function getPw(){return localStorage.getItem(PW_KEY)||DEFAULT_PW;}
+function setPw(p){localStorage.setItem(PW_KEY,p);}
+
+function getRoomData(hid,ri){
+  // New shared-periods system (from updated Operations export)
+  if(DB[hid]&&DB[hid].__sharedPeriods&&DB[hid].__sharedPeriods.length>0){
+    const sharedPeriods=DB[hid].__sharedPeriods
+      .filter(sp=>sp.rooms&&sp.rooms[ri]&&sp.rooms[ri].price)
+      .map(sp=>({
+        id:sp.id,
+        label:sp.label||'',
+        from:sp.from,
+        to:sp.to,
+        price:sp.rooms[ri].price,
+        priceTo:sp.rooms[ri].priceTo||''
+      }));
+    const notes=DB[hid]&&DB[hid].__notes!==undefined?DB[hid].__notes:(HOTELS.find(x=>x.id==hid)||{}).notes||'';
+    return{periods:sharedPeriods,notes};
+  }
+  // Legacy per-room system
+  if(DB[hid]&&DB[hid][ri])return DB[hid][ri];
+  const h=HOTELS.find(x=>x.id==hid);
+  return{periods:[],notes:h?h.notes:''};
+}
+function getHotelNotes(hid){
+  if(DB[hid]&&DB[hid].__notes!==undefined)return DB[hid].__notes;
+  const h=HOTELS.find(x=>x.id==hid);
+  return h?h.notes:'';
+}
+
+// ── HELPERS ──
+function daysBetween(a,b){return Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000);}
+function addDays(s,n){const d=new Date(s+'T00:00:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
+function formatAr(s){if(!s)return'';return new Date(s+'T00:00:00').toLocaleDateString('ar-EG',{year:'numeric',month:'long',day:'numeric'});}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function calcBooking(periods,checkIn,checkOut){
+  const nights=daysBetween(checkIn,checkOut);
+  if(nights<=0)return null;
+  const breakdown=[];let total=0,uncovered=0;
+  for(let i=0;i<nights;i++){
+    const nd=addDays(checkIn,i),ne=addDays(checkIn,i+1);
+    const match=periods.find(p=>p.from&&p.to&&p.price&&nd>=p.from&&ne<=p.to);
+    if(match){
+      const price=parseFloat(match.price);
+      if(!isNaN(price)){
+        total+=price;
+        const last=breakdown[breakdown.length-1];
+        if(last&&last.lbl===match.label&&last.price===price){last.n++;last.sub+=price;}
+        else breakdown.push({lbl:match.label||(match.from+'→'+match.to),price,n:1,sub:price,range:!!match.priceTo,priceTo:match.priceTo?parseFloat(match.priceTo):null});
+      }
+    }else uncovered++;
+  }
+  return{breakdown,total,nights,uncovered};
+}
+
+// ── TABS ──
+function switchTab(t){
+  currentTab=t;
+  document.getElementById('tabCalc').className='tab'+(t==='calc'?' active':'');
+  if(document.getElementById('tabReports'))document.getElementById('tabReports').className='tab'+(t==='reports'?' active':'');
+  document.getElementById('pageCalc').style.display=t==='calc'?'block':'none';
+  if(document.getElementById('pageReports'))document.getElementById('pageReports').style.display=t==='reports'?'block':'none';
+  if(t==='reports')renderReports();
+  if(t==='calc')renderCalc();
+}
+
+// ── MODALS ──
+function closeModal(id){document.getElementById(id).style.display='none';}
+function confirmReset(){document.getElementById('overlayReset').style.display='flex';}
+function doReset(){
+  DB=buildFresh();save();
+  customHotels=[];hotelRooms={};saveHotels();
+  aHotelId='';aRegion='';aExpanded={};
+  closeModal('overlayReset');
+  if(currentTab==='admin')renderAdmin();
+  showToast('تم إعادة التعيين','orange');
+}
+
+function checkPw(){
+  const v=document.getElementById('pwInput').value;
+  if(v===getPw()){
+    closeModal('overlayPw');adminUnlocked=true;
+    // Sales: no admin tab to show
+    showToast('إدارة الأسعار من الأوبريشن فقط','orange');
+  }else{
+    document.getElementById('pwErr').style.display='block';
+    const m=document.getElementById('pwModal');m.classList.add('shake');
+    setTimeout(()=>m.classList.remove('shake'),600);
+    document.getElementById('pwInput').value='';
+  }
+}
+
+function openChangePw(){
+  document.getElementById('cpCurrent').value='';document.getElementById('cpNew').value='';document.getElementById('cpConfirm').value='';
+  document.getElementById('cpMsg').style.display='none';
+  document.getElementById('overlayChangePw').style.display='flex';
+}
+function doChangePw(){
+  const cur=document.getElementById('cpCurrent').value,nw=document.getElementById('cpNew').value,cf=document.getElementById('cpConfirm').value;
+  const msg=document.getElementById('cpMsg');msg.style.display='block';
+  if(cur!==getPw()){msg.className='alert alert-red';msg.textContent='كلمة المرور الحالية غير صحيحة';return;}
+  if(nw.length<4){msg.className='alert alert-red';msg.textContent='كلمة المرور لا تقل عن 4 أحرف';return;}
+  if(nw!==cf){msg.className='alert alert-red';msg.textContent='كلمة المرور الجديدة غير متطابقة';return;}
+  setPw(nw);msg.className='alert alert-green';msg.textContent='✓ تم تغيير كلمة المرور بنجاح';
+  setTimeout(()=>closeModal('overlayChangePw'),1500);
+}
+
+// ── IMPORT FROM OPERATIONS (SALES ONLY) ──
+function doExport(){ showToast('التصدير غير متاح في نسخة المبيعات','red'); }
+function triggerImportOps(){document.getElementById('importFile').click();}
+function triggerImport(){document.getElementById('importFile').click();}
+function handleImport(inp){
+  const file=inp.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const parsed=JSON.parse(e.target.result);
+      // Accept both ops export and regular export
+      if(parsed.exportedBy==='operations'||parsed.version==='sales_1.0'||parsed.data){
+        DB=parsed.data||parsed;
+        if(Object.prototype.hasOwnProperty.call(parsed,'customHotels')) customHotels=parsed.customHotels||[];
+        if(Object.prototype.hasOwnProperty.call(parsed,'hotelRooms'))   hotelRooms=parsed.hotelRooms||{};
+        rebuildHotels();
+        // Online-only: prices in memory only — no localStorage save
+        showToast('✓ تم استيراد أسعار الأوبريشن بنجاح!','green');
+        renderCalc();
+        renderReports();
+      } else {
+        showToast('❌ الملف ده مش من الأوبريشن','red');
+      }
+    }catch(err){showToast('❌ خطأ في قراءة الملف','red');}
+  };
+  reader.readAsText(file);inp.value='';
+}
+
+// ── TOAST ──
+function showToast(msg,type){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;border-radius:14px;padding:12px 24px;font-size:14px;font-weight:700;transition:opacity .4s;white-space:nowrap;direction:rtl';document.body.appendChild(t);}
+  const colors={green:'background:rgba(20,83,45,0.95);border:1px solid #4ade80;color:#86efac',red:'background:rgba(127,29,29,0.95);border:1px solid #f87171;color:#fca5a5',orange:'background:rgba(120,53,15,0.95);border:1px solid #fb923c;color:#fdba74'};
+  t.setAttribute('style',t.style.cssText+';'+colors[type]);t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._tm);t._tm=setTimeout(()=>{t.style.opacity='0';},3000);
+}
+
+
+// ── iOS-COMPATIBLE CLIPBOARD ──
+function iosClipboard(txt,onSuccess){
+  // Modern API first
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(txt).then(onSuccess).catch(()=>iosClipboardFallback(txt,onSuccess));
+  } else {
+    iosClipboardFallback(txt,onSuccess);
+  }
+}
+function iosClipboardFallback(txt,onSuccess){
+  // iOS Safari fallback: must use execCommand inside a user gesture
+  const ta=document.createElement('textarea');
+  ta.value=txt;
+  ta.style.cssText='position:fixed;top:50%;left:50%;width:1px;height:1px;opacity:0;font-size:16px';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  // iOS needs setSelectionRange
+  ta.setSelectionRange(0,99999);
+  try{document.execCommand('copy');}catch(e){}
+  document.body.removeChild(ta);
+  if(onSuccess)onSuccess();
+}
+
+// ── COPY BOOKING ──
+function copyBookingResult(){
+  const hotel=HOTELS.find(x=>x.id===parseInt(cHotelId));
+  if(!hotel)return;
+  const rd=getRoomData(hotel.id,parseInt(cRoomIdx));
+  const res=calcBooking(rd.periods||[],cCheckIn,cCheckOut);
+  if(!res)return;
+  let txt=`📋 تفاصيل الحجز\n`;
+  txt+=`━━━━━━━━━━━━━━━━━\n`;
+  txt+=`👤 العميل: ${cClient}\n`;
+  txt+=`🏨 الفندق: ${hotel.name}\n`;
+  txt+=`🛏 الغرفة: ${hotel.rooms[parseInt(cRoomIdx)].n}\n`;
+  txt+=`📅 الدخول: ${formatAr(cCheckIn)}\n`;
+  txt+=`📅 المغادرة: ${formatAr(cCheckOut)}\n`;
+  txt+=`🌙 عدد الليالي: ${res.nights}\n`;
+  txt+=`━━━━━━━━━━━━━━━━━\n`;
+  if(res.breakdown.length>0){
+    const hasRange=res.breakdown.some(b=>b.range);
+    const rawMin=hasRange?res.breakdown.reduce((s,b)=>s+b.n*b.price,0):res.total;
+    const rawMax=hasRange?res.breakdown.reduce((s,b)=>s+b.n*(b.priceTo||b.price),0):res.total;
+    const totalStr=hasRange?fmtAmt(rawMin)+'$ – '+fmtAmt(rawMax)+'$':fmtAmt(rawMin)+'$';
+    txt+=`💰 إجمالي الحجز:\n`;
+    txt+=`━━━━━━━━━━━━━━━━━\n`;
+    txt+=`✅ الإجمالي: ${totalStr}\n`;
+    const notes=getHotelNotes(hotel.id);
+    if(notes){txt+=`━━━━━━━━━━━━━━━━━\n📋 ملاحظات:\n${notes}\n`;}
+  }
+  iosClipboard(txt,()=>{
+    const btn=document.getElementById('copyBtn');
+    if(btn){btn.textContent='✓ تم النسخ!';btn.classList.add('copied');setTimeout(()=>{btn.textContent='📋 نسخ تفاصيل الحجز';btn.classList.remove('copied');},2500);}
+    else showToast('✓ تم النسخ!','green');
+  });
+}
+
+// ══════════════════════════════════════════════════
+// ADD HOTEL MODAL
+// ══════════════════════════════════════════════════
+function openAddHotel(){
+  nhRooms=[];
+  document.getElementById('nhName').value='';
+  document.getElementById('nhRegionNew').value='';
+  document.getElementById('nhNotes').value='';
+  document.getElementById('nhRoomInp').value='';
+  document.getElementById('nhMsg').style.display='none';
+  // populate regions select
+  const regions=[...new Set(HOTELS.map(h=>h.region))];
+  const sel=document.getElementById('nhRegionSel');
+  sel.innerHTML='<option value="">— اختر منطقة موجودة —</option>';
+  regions.forEach(r=>{sel.innerHTML+=`<option value="${esc(r)}">${esc(r)}</option>`;});
+  renderNhRoomList();
+  document.getElementById('overlayAddHotel').style.display='flex';
+  setTimeout(()=>document.getElementById('nhName').focus(),100);
+}
+function syncRegionSel(){
+  const v=document.getElementById('nhRegionSel').value;
+  if(v)document.getElementById('nhRegionNew').value='';
+}
+function syncRegionInp(){
+  if(document.getElementById('nhRegionNew').value)document.getElementById('nhRegionSel').value='';
+}
+function addRoomToList(){
+  const v=document.getElementById('nhRoomInp').value.trim();
+  if(!v)return;
+  nhRooms.push(v);
+  document.getElementById('nhRoomInp').value='';
+  renderNhRoomList();
+  document.getElementById('nhRoomInp').focus();
+}
+function removeNhRoom(i){nhRooms.splice(i,1);renderNhRoomList();}
+function renderNhRoomList(){
+  const el=document.getElementById('nhRoomList');
+  if(nhRooms.length===0){el.innerHTML='<p style="color:var(--text3);font-size:12px;text-align:center;padding:10px 0">لم تُضَف غرف بعد</p>';return;}
+  el.innerHTML=nhRooms.map((r,i)=>`
+    <div class="room-list-item">
+      <span>${esc(r)}</span>
+      <button class="btn btn-red" style="padding:4px 10px;font-size:11px" onclick="removeNhRoom(${i})">✕</button>
+    </div>`).join('');
+}
+function saveNewHotel(){
+  const name=document.getElementById('nhName').value.trim();
+  const region=document.getElementById('nhRegionSel').value||document.getElementById('nhRegionNew').value.trim();
+  const notes=document.getElementById('nhNotes').value.trim();
+  const msg=document.getElementById('nhMsg');
+  if(!name){msg.style.display='block';msg.className='alert alert-red';msg.textContent='أدخل اسم الفندق';return;}
+  if(!region){msg.style.display='block';msg.className='alert alert-red';msg.textContent='اختر أو أدخل المنطقة';return;}
+  if(nhRooms.length===0){msg.style.display='block';msg.className='alert alert-red';msg.textContent='أضف غرفة واحدة على الأقل';return;}
+  // generate unique id
+  const newId='custom_'+Date.now();
+  const newHotel={id:newId,name,region,notes,rooms:nhRooms.map(n=>({n})),_custom:true};
+  customHotels.push(newHotel);
+  saveHotels();
+  // init DB for new hotel
+  if(!DB[newId])DB[newId]={};
+  newHotel.rooms.forEach((_,i)=>{DB[newId][i]={periods:[],notes};});
+  save();
+  closeModal('overlayAddHotel');
+  aHotelId=String(newId);aRegion='';aExpanded={};
+  renderAdmin();
+  showToast(`✓ تم إضافة ${name} بنجاح!`,'green');
+}
+
+// ══════════════════════════════════════════════════
+// EDIT HOTEL MODAL (rooms + name + region)
+// ══════════════════════════════════════════════════
+function openEditHotel(hid){
+  const hotel=HOTELS.find(h=>h.id==hid);
+  if(!hotel)return;
+  ehHotelId=hid;
+  ehRooms=hotel.rooms.map(r=>r.n);
+  document.getElementById('ehName').value=hotel.name;
+  document.getElementById('ehRegion').value=hotel.region;
+  document.getElementById('ehRoomInp').value='';
+  document.getElementById('ehMsg').style.display='none';
+  document.getElementById('editHotelSubtitle').textContent=hotel.name;
+  renderEhRoomList();
+  document.getElementById('overlayEditHotel').style.display='flex';
+}
+function addRoomToEditList(){
+  const v=document.getElementById('ehRoomInp').value.trim();
+  if(!v)return;
+  ehRooms.push(v);
+  document.getElementById('ehRoomInp').value='';
+  renderEhRoomList();
+  document.getElementById('ehRoomInp').focus();
+}
+function removeEhRoom(i){
+  if(ehRooms.length<=1){showToast('يجب أن يكون هناك غرفة واحدة على الأقل','red');return;}
+  ehRooms.splice(i,1);renderEhRoomList();
+}
+function renderEhRoomList(){
+  const el=document.getElementById('ehRoomList');
+  if(ehRooms.length===0){el.innerHTML='<p style="color:var(--text3);font-size:12px;padding:10px 0">لا توجد غرف</p>';return;}
+  el.innerHTML=ehRooms.map((r,i)=>`
+    <div class="room-list-item">
+      <input class="room-edit-inp" value="${esc(r)}" oninput="ehRooms[${i}]=this.value">
+      <button class="btn btn-red" style="padding:4px 10px;font-size:11px;flex-shrink:0" onclick="removeEhRoom(${i})">✕</button>
+    </div>`).join('');
+}
+function saveEditHotel(){
+  const name=document.getElementById('ehName').value.trim();
+  const region=document.getElementById('ehRegion').value.trim();
+  const msg=document.getElementById('ehMsg');
+  if(!name){msg.style.display='block';msg.className='alert alert-red';msg.textContent='أدخل اسم الفندق';return;}
+  if(!region){msg.style.display='block';msg.className='alert alert-red';msg.textContent='أدخل المنطقة';return;}
+  if(ehRooms.length===0){msg.style.display='block';msg.className='alert alert-red';msg.textContent='يجب وجود غرفة واحدة على الأقل';return;}
+  const hotel=HOTELS.find(h=>h.id==ehHotelId);
+  const newRooms=ehRooms.map(n=>({n}));
+  // check if custom or base
+  const ci=customHotels.findIndex(h=>h.id==ehHotelId);
+  if(ci>=0){
+    customHotels[ci]={...customHotels[ci],name,region,rooms:newRooms};
+  }else{
+    hotelRooms[ehHotelId]={name,region,rooms:newRooms};
+  }
+  saveHotels();
+  // reconcile DB: keep existing period data for rooms at same index
+  if(!DB[ehHotelId])DB[ehHotelId]={};
+  const oldDB={...DB[ehHotelId]};
+  DB[ehHotelId]={};
+  newRooms.forEach((_,i)=>{DB[ehHotelId][i]=oldDB[i]||{periods:[],notes:''};});
+  if(oldDB.__notes!==undefined)DB[ehHotelId].__notes=oldDB.__notes;
+  save();
+  closeModal('overlayEditHotel');
+  renderAdmin();
+  showToast(`✓ تم تحديث ${name}`,'green');
+}
+function deleteCustomHotel(hid){
+  if(!confirm('هل تريد حذف هذا الفندق نهائياً؟'))return;
+  customHotels=customHotels.filter(h=>h.id!=hid);
+  saveHotels();
+  delete DB[hid];save();
+  aHotelId='';aExpanded={};
+  renderAdmin();
+  showToast('تم حذف الفندق','orange');
+}
+
+// ══════════════════════════════════════════════════
+// CALC PAGE
+// ══════════════════════════════════════════════════
+function renderCalc(){
+  const calcPage=document.getElementById('pageCalc');
+  if(!calcPage)return; // guard: element not ready yet
+  const fbConnected=fbReady&&lastAppliedTimestamp>0;
+  const bannerBg=fbConnected?'rgba(20,83,45,0.25)':'rgba(30,58,138,0.25)';
+  const bannerBorder=fbConnected?'rgba(34,197,94,0.35)':'rgba(96,165,250,0.3)';
+  const importBanner=`<div style="background:${bannerBg};border:1px solid ${bannerBorder};border-radius:14px;padding:10px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+    <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
+      <span id="fbDot" style="width:9px;height:9px;border-radius:50%;background:#f87171;flex-shrink:0;transition:all .4s;box-shadow:0 0 7px #f8717199"></span>
+      <div style="min-width:0">
+        <div style="font-size:11px;font-weight:900;color:#93c5fd">📡 مزامنة الأسعار — Real-time</div>
+        <div id="fbLabel" style="font-size:10px;color:var(--text3);margin-top:1px">${fbConnected?'✓ متصل':'جاري الاتصال بـ Firebase...'}</div>
+      </div>
+    </div>
+    <button class="btn" style="background:rgba(30,58,138,0.5);border:1px solid rgba(96,165,250,0.4);color:#93c5fd;font-size:11px;padding:6px 14px;flex-shrink:0" onclick="manualRefresh()">🔄 تحديث الآن</button>
+  </div>`;
+  const regions=[...new Set(HOTELS.map(h=>h.region))];
+  let hotelOptions='<option value="">— اختر الفندق —</option>';
+  regions.forEach(r=>{
+    hotelOptions+=`<optgroup label="── ${esc(r)}">`;
+    HOTELS.filter(h=>h.region===r).forEach(h=>{hotelOptions+=`<option value="${h.id}">${esc(h.name)}</option>`;});
+    hotelOptions+='</optgroup>';
+  });
+  const h=HOTELS.find(x=>x.id==cHotelId);
+  let roomOptions='<option value="">— اختر الغرفة —</option>';
+  if(h)h.rooms.forEach((r,i)=>{roomOptions+=`<option value="${i}">${esc(r.n)}</option>`;});
+
+  // Commission UI — type toggle + input
+  const commTypePct=cCommType==='pct';
+  const commTypeUsd=cCommType==='usd';
+  const commTypeEgp=cCommType==='egp';
+  const commPlaceholder=commTypePct?'مثال: 10':'المبلغ';
+  const commLabel=commTypePct?'% نسبة':commTypeUsd?'$ دولار':'ج.م جنيه';
+  const commissionBlock=`
+    <div class="field" style="margin-bottom:0">
+      <label>💼 عمولتي على الحجز</label>
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <button onclick="cCommType='pct';renderCalc()" style="flex:1;padding:7px 4px;border-radius:10px;border:1px solid ${commTypePct?'var(--gold)':'var(--border)'};background:${commTypePct?'rgba(161,98,7,0.3)':'var(--bg3)'};color:${commTypePct?'#fef08a':'var(--text2)'};font-size:12px;font-weight:900;cursor:pointer">% نسبة</button>
+        <button onclick="cCommType='usd';renderCalc()" style="flex:1;padding:7px 4px;border-radius:10px;border:1px solid ${commTypeUsd?'rgba(96,165,250,0.7)':'var(--border)'};background:${commTypeUsd?'rgba(30,58,138,0.4)':'var(--bg3)'};color:${commTypeUsd?'#93c5fd':'var(--text2)'};font-size:12px;font-weight:900;cursor:pointer">$ دولار</button>
+        <button onclick="cCommType='egp';renderCalc()" style="flex:1;padding:7px 4px;border-radius:10px;border:1px solid ${commTypeEgp?'rgba(52,211,153,0.7)':'var(--border)'};background:${commTypeEgp?'rgba(6,78,59,0.4)':'var(--bg3)'};color:${commTypeEgp?'#6ee7b7':'var(--text2)'};font-size:12px;font-weight:900;cursor:pointer">ج.م جنيه</button>
+      </div>
+      <div style="position:relative">
+        <input class="inp" type="number" id="cCommission" value="${cCommission||''}" placeholder="${commPlaceholder}" min="0" oninput="cCommission=parseFloat(this.value)||0" style="padding-left:52px">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:900;color:${commTypePct?'var(--gold)':commTypeUsd?'#93c5fd':'#6ee7b7'};pointer-events:none">${commLabel}</span>
+      </div>
+    </div>`;
+
+  calcPage.innerHTML=importBanner+`
+    <div class="grid2" style="margin-bottom:14px">
+      <div class="field" style="margin-bottom:0">
+        <label>👤 اسم العميل</label>
+        <input class="inp" type="text" id="cClient" value="${esc(cClient)}" placeholder="أدخل اسم العميل..." oninput="cClient=this.value">
+      </div>
+      ${commissionBlock}
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label>🏨 الفندق</label>
+        <select class="inp" id="cHotel" onchange="cHotelId=this.value;cRoomIdx='';renderCalc()">${hotelOptions}</select>
+      </div>
+      <div class="field">
+        <label>🛏 نوع الغرفة</label>
+        <select class="inp" id="cRoom" ${!h?'disabled':''} onchange="cRoomIdx=this.value">${roomOptions}</select>
+      </div>
+      <div class="field">
+        <label>📅 تاريخ الدخول</label>
+        <input class="inp" type="date" id="cIn" value="${cCheckIn}" onchange="cCheckIn=this.value">
+      </div>
+      <div class="field">
+        <label>📅 تاريخ المغادرة</label>
+        <input class="inp" type="date" id="cOut" value="${cCheckOut}" onchange="cCheckOut=this.value">
+      </div>
+    </div>
+    <div id="calcErr"></div>
+    <button class="btn btn-gold" onclick="doCalc()">✦ احسب الإجمالي</button>
+    <div id="calcNotes" style="margin-top:16px"></div>
+    <div id="calcResult" style="margin-top:16px"></div>
+  `;
+  if(cHotelId)document.getElementById('cHotel').value=cHotelId;
+  if(cRoomIdx!=='')document.getElementById('cRoom').value=cRoomIdx;
+}
+
+function fmtAmt(n){
+  // Show up to 2 decimal places, strip trailing zeros
+  if(n===Math.round(n))return n.toFixed(0);
+  return parseFloat(n.toFixed(2)).toString();
+}
+
+function doCalc(){
+  const err=document.getElementById('calcErr');err.innerHTML='';
+  cClient=document.getElementById('cClient').value;
+  cHotelId=document.getElementById('cHotel').value;
+  cRoomIdx=document.getElementById('cRoom').value;
+  cCheckIn=document.getElementById('cIn').value;
+  cCheckOut=document.getElementById('cOut').value;
+  if(!cClient.trim()){err.innerHTML='<div class="alert alert-red">⚠️ أدخل اسم العميل</div>';return;}
+  if(!cHotelId){err.innerHTML='<div class="alert alert-red">⚠️ اختر الفندق</div>';return;}
+  if(cRoomIdx===''){err.innerHTML='<div class="alert alert-red">⚠️ اختر نوع الغرفة</div>';return;}
+  if(!cCheckIn){err.innerHTML='<div class="alert alert-red">⚠️ أدخل تاريخ الدخول</div>';return;}
+  if(!cCheckOut){err.innerHTML='<div class="alert alert-red">⚠️ أدخل تاريخ المغادرة</div>';return;}
+  if(cCheckOut<=cCheckIn){err.innerHTML='<div class="alert alert-red">⚠️ تاريخ المغادرة يجب أن يكون بعد الدخول</div>';return;}
+  cCommission=parseFloat(document.getElementById('cCommission')?.value)||0;
+  const hotel=HOTELS.find(x=>x.id==cHotelId);
+  const notes=getHotelNotes(hotel.id);
+  document.getElementById('calcNotes').innerHTML=notes?`<div class="notes-box"><p class="sec-label" style="margin-bottom:6px">📋 ملاحظات الفندق</p><p>${esc(notes)}</p></div>`:'';
+  const rd=getRoomData(hotel.id,parseInt(cRoomIdx));
+  const res=calcBooking(rd.periods||[],cCheckIn,cCheckOut);
+  if(!res){document.getElementById('calcResult').innerHTML='<div class="alert alert-red">⚠️ خطأ في الحساب</div>';return;}
+  let breakdown='';
+  if(res.breakdown.length>0){
+    const hasRange=res.breakdown.some(b=>b.range);
+    // Raw cost totals (NO commission added to displayed price)
+    const rawMin=hasRange?res.breakdown.reduce((s,b)=>s+b.n*b.price,0):res.total;
+    const rawMax=hasRange?res.breakdown.reduce((s,b)=>s+b.n*(b.priceTo||b.price),0):res.total;
+
+    // Breakdown rows — show COST prices only (no commission in display)
+    res.breakdown.forEach(b=>{
+      breakdown+=`<div class="breakdown-row">
+        <div>
+          <div style="color:var(--text);font-size:14px;font-weight:700">${esc(b.lbl)}</div>
+          <div style="color:var(--text3);font-size:11px">${b.n} ليلة × ${b.range?fmtAmt(b.price)+'$ – '+fmtAmt(b.priceTo)+'$':fmtAmt(b.price)+'$'}</div>
+        </div>
+        <div style="color:#fde68a;font-weight:900;font-size:16px">${b.range?fmtAmt(b.n*b.price)+'$ – '+fmtAmt(b.n*(b.priceTo||b.price))+'$':fmtAmt(b.sub)+'$'}</div>
+      </div>`;
+    });
+    if(res.uncovered>0)breakdown+=`<div class="alert alert-orange">⚠️ ${res.uncovered} ليلة غير مشمولة بأي فترة سعرية — تواصل مع الأوبريشن</div>`;
+
+    // Total booking price box (cost only, no commission)
+    const totalRawStr=hasRange?fmtAmt(rawMin)+'$ – '+fmtAmt(rawMax)+'$':fmtAmt(rawMin)+'$';
+    breakdown+=`<div class="total-box" style="margin-bottom:10px">
+      <div>
+        <p class="sec-label" style="margin-bottom:2px">إجمالي الحجز</p>
+        <p style="font-size:11px;color:var(--text3)">${res.nights} ليلة</p>
+      </div>
+      <div class="total-amount">${totalRawStr}</div>
+    </div>`;
+
+    // Commission box — always separate, only shown if value entered
+    if(cCommission>0){
+      // Calculate commission amount
+      let commUsdMin,commUsdMax,commPerNight,commLabel,commTypeLabel;
+      if(cCommType==='pct'){
+        // percentage of total
+        commUsdMin=rawMin*(cCommission/100);
+        commUsdMax=rawMax*(cCommission/100);
+        commPerNight=hasRange?null:(rawMin/res.nights)*(cCommission/100);
+        commTypeLabel=`${cCommission}% من إجمالي الحجز`;
+        commLabel=`${cCommission}%`;
+      } else if(cCommType==='usd'){
+        // fixed $ per night
+        commUsdMin=cCommission*res.nights;
+        commUsdMax=cCommission*res.nights;
+        commPerNight=cCommission;
+        commTypeLabel=`${fmtAmt(cCommission)}$ لكل ليلة × ${res.nights} ليلة`;
+        commLabel=`${fmtAmt(cCommission)}$/ليلة`;
+      } else {
+        // egp per night — stay in EGP, no conversion
+        commUsdMin=cCommission*res.nights; // actually EGP total, variable reused for display
+        commUsdMax=cCommission*res.nights;
+        commPerNight=cCommission; // EGP per night
+        commTypeLabel=`${fmtAmt(cCommission)} ج.م/ليلة × ${res.nights} ليلة`;
+        commLabel=`${fmtAmt(cCommission)} ج.م/ليلة`;
+      }
+      const commDispStr=cCommType==='egp'
+        ? fmtAmt(commUsdMin)+' ج.م'
+        : (hasRange&&cCommType==='pct'?fmtAmt(commUsdMin)+'$ – '+fmtAmt(commUsdMax)+'$':fmtAmt(commUsdMin)+'$');
+      const perNightDisp=commPerNight!==null?`<div style="font-size:11px;color:var(--text3);margin-top:4px">عمولة الليلة: <span style="color:#86efac;font-weight:700">${cCommType==='egp'?fmtAmt(cCommission)+' ج.م':fmtAmt(commPerNight)+'$'}</span></div>`:'';
+      breakdown+=`<div style="background:rgba(20,83,45,0.25);border:2px solid rgba(34,197,94,0.5);border-radius:14px;padding:14px 16px;margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-size:12px;font-weight:900;color:#86efac;letter-spacing:1px">💼 عمولتي</span>
+          <span style="font-size:22px;font-weight:900;color:#4ade80">${commDispStr}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text3)">${commTypeLabel}</div>
+        ${perNightDisp}
+      </div>`;
+    }
+  }else{
+    breakdown=`<div style="text-align:center;padding:32px 0"><span style="font-size:40px">💰</span><p style="color:#fdba74;font-weight:700;margin-top:12px">لم يتم إدخال أسعار لهذه الغرفة في الفترة المطلوبة</p><p style="color:var(--text3);font-size:12px;margin-top:6px">يرجى الانتقال للوحة التحكم وإضافة الفترات السعرية</p></div>`;
+  }
+  document.getElementById('calcResult').innerHTML=`
+    <div style="background:var(--bg2);border:2px solid rgba(234,179,8,0.5);border-radius:20px;overflow:hidden">
+      <div class="result-header">
+        <div style="font-size:11px;color:var(--gold);margin-bottom:4px">${esc(hotel.region)}</div>
+        <div style="font-size:20px;font-weight:900;color:#fef08a">${esc(hotel.name)}</div>
+        <div style="font-size:13px;color:var(--text3);margin-top:4px">${esc(hotel.rooms[parseInt(cRoomIdx)].n)}</div>
+      </div>
+      <div style="padding:20px">
+        <div class="chips">
+          <span class="chip">👤 ${esc(cClient)}</span>
+          <span class="chip">📅 ${formatAr(cCheckIn)}</span>
+          <span class="chip">📅 ${formatAr(cCheckOut)}</span>
+          <span class="chip chip-gold">🌙 ${res.nights} ليلة</span>
+        </div>
+        ${res.breakdown.length>0?`<p class="sec-label" style="margin-bottom:10px">تفصيل الأسعار</p>`:''}
+        ${breakdown}
+        ${res.breakdown.length>0?`<button class="btn btn-copy" id="copyBtn" onclick="copyBookingResult()">📋 نسخ تفاصيل الحجز</button>`:''}
+        ${res.breakdown.length>0?`<button class="btn" id="saveBookingBtn" style="background:rgba(30,58,138,0.5);border:1px solid rgba(96,165,250,0.4);color:#93c5fd;font-size:13px;width:100%;justify-content:center;margin-top:8px;padding:11px" onclick="saveBookingRecord()">💾 حفظ في تقارير المبيعات</button>`:''}
+      </div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════
+// ADMIN PAGE
+// ══════════════════════════════════════════════════
+function renderAdmin(){
+  const regions=[...new Set(HOTELS.map(h=>h.region))];
+  let pillsHtml=`<button class="pill${aRegion===''?' active':''}" onclick="aRegion='';aHotelId='';aExpanded={};renderAdmin()">الكل (${HOTELS.length})</button>`;
+  regions.forEach(r=>{
+    const cnt=HOTELS.filter(h=>h.region===r).length;
+    pillsHtml+=`<button class="pill${aRegion===r?' active':''}" onclick="aRegion=\`${r.replace(/`/g,"'")}\`;aHotelId='';aExpanded={};renderAdmin()">${esc(r)} (${cnt})</button>`;
+  });
+  const filtered=aRegion?HOTELS.filter(h=>h.region===aRegion):HOTELS;
+  let hotelOpts='<option value="">— اختر الفندق —</option>';
+  filtered.forEach(h=>{
+    const hasData=DB[h.id]&&(
+      (DB[h.id].__sharedPeriods&&DB[h.id].__sharedPeriods.some(sp=>sp.rooms&&Object.values(sp.rooms).some(r=>r&&r.price)))||
+      Object.values(DB[h.id]).some(r=>r&&r.periods&&r.periods.length>0)
+    );
+    hotelOpts+=`<option value="${h.id}">${hasData?'✓ ':''}${esc(h.name)}${h._custom?' ★':''}</option>`;
+  });
+  const hotel=aHotelId!==''?HOTELS.find(h=>h.id==aHotelId):null;
+  let hotelContent='';
+  if(hotel){
+    const notes=getHotelNotes(hotel.id);
+    let roomsHtml='';
+    hotel.rooms.forEach((r,i)=>{
+      const key=`${hotel.id}_${i}`;
+      const rd=getRoomData(hotel.id,i);
+      const hasP=rd.periods&&rd.periods.length>0;
+      const isOpen=!!aExpanded[key];
+      let periodsHtml='';
+      if(isOpen){
+        if(rd.periods.length===0)periodsHtml='<p style="color:var(--text3);font-size:12px;text-align:center;padding:12px 0">لا توجد فترات — اضغط "إضافة فترة"</p>';
+        rd.periods.forEach((p,pi)=>{
+          const prev=p.from&&p.to&&p.price?`<div class="period-preview">✦ ${p.from} → ${p.to} | ${p.price}${p.priceTo?' – '+p.priceTo:''}$</div>`:'';
+          periodsHtml+=`<div class="period-card">
+            <div class="period-header"><span class="period-label">الفترة ${pi+1}</span><button class="btn btn-red" onclick="deletePeriod('${hotel.id}',${i},${pi})">حذف ✕</button></div>
+            <div class="field"><label>✏️ تسمية الفترة</label><input class="inp" style="font-size:13px;padding:10px 14px" type="text" value="${esc(p.label||'')}" placeholder="مثال: موسم الصيف..." oninput="updatePeriodField('${hotel.id}',${i},${pi},'label',this.value)"></div>
+            <div class="grid2">
+              <div class="field"><label>📅 من</label><input class="inp" style="font-size:13px;padding:10px 14px" type="date" value="${p.from||''}" onchange="updatePeriodField('${hotel.id}',${i},${pi},'from',this.value)"></div>
+              <div class="field"><label>📅 إلى</label><input class="inp" style="font-size:13px;padding:10px 14px" type="date" value="${p.to||''}" onchange="updatePeriodField('${hotel.id}',${i},${pi},'to',this.value)"></div>
+              <div class="field"><label>💲 سعر الليلة</label><input class="inp" style="font-size:13px;padding:10px 14px" type="number" value="${p.price||''}" placeholder="0" oninput="updatePeriodField('${hotel.id}',${i},${pi},'price',this.value)"></div>
+              <div class="field"><label>💲 حتى (نطاق)</label><input class="inp" style="font-size:13px;padding:10px 14px" type="number" value="${p.priceTo||''}" placeholder="اختياري" oninput="updatePeriodField('${hotel.id}',${i},${pi},'priceTo',this.value)"></div>
+            </div>
+            ${prev}
+          </div>`;
+        });
+        periodsHtml+=`<button class="btn btn-yellow" style="width:100%;justify-content:center;margin-top:4px" onclick="addPeriod('${hotel.id}',${i})">+ إضافة فترة</button>`;
+      }
+      roomsHtml+=`
+        <button class="room-toggle${isOpen?' open':''}" onclick="toggleRoom('${key}')">
+          <span style="display:flex;align-items:center;gap:8px">
+            <span class="dot ${hasP?'dot-green':'dot-gray'}"></span>
+            <span>${esc(r.n)}</span>
+          </span>
+          <span style="display:flex;align-items:center;gap:6px">
+            ${hasP?`<span class="badge">${rd.periods.length} فترة</span>`:''}
+            <span class="arrow${isOpen?' open':''}">⌄</span>
+          </span>
+        </button>
+        ${isOpen?`<div class="room-body">${periodsHtml}</div>`:''}`;
+    });
+    hotelContent=`
+      <div class="hotel-info">
+        <div class="hotel-info-top">
+          <div>
+            <div class="card-header">${esc(hotel.name)}${hotel._custom?' <span style="font-size:11px;color:var(--gold3)">★ مضاف</span>':''}</div>
+            <div class="card-sub">${esc(hotel.region)}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+            <span class="rooms-badge">${hotel.rooms.length} غرفة</span>
+            <button class="btn btn-purple" style="padding:4px 12px;font-size:11px" onclick="openEditHotel('${hotel.id}')">✏️ تعديل</button>
+            ${hotel._custom?`<button class="btn btn-red" style="padding:4px 12px;font-size:11px" onclick="deleteCustomHotel('${hotel.id}')">🗑 حذف</button>`:''}
+          </div>
+        </div>
+        <div style="background:var(--bg);border:1px solid rgba(161,98,7,0.25);border-radius:12px;padding:12px">
+          <label style="display:block;font-size:11px;font-weight:900;color:var(--gold2);margin-bottom:6px">📋 ملاحظات الفندق — قابلة للتعديل</label>
+          <textarea class="inp" style="font-size:12px;padding:10px 14px" rows="4" onchange="updateNotes('${hotel.id}',this.value)">${esc(notes)}</textarea>
+        </div>
+      </div>
+      <p class="sec-label">③ اختر الغرفة لتعديل أسعارها</p>
+      ${roomsHtml}`;
+  }else{
+    hotelContent=`<div class="empty"><span>🏨</span><p>اختر فندقاً للبدء</p><small>اختر المنطقة أولاً ثم الفندق من القائمة</small></div>`;
+  }
+
+  document.getElementById('pageAdmin').innerHTML=`
+    <div class="tools-bar">
+      <p class="tools-title">🔧 أدوات البيانات</p>
+      <div class="tools-btns">
+        <button class="btn btn-gray" onclick="showToast('التصدير من الأوبريشن فقط','red')">📤 تصدير (من الأوبريشن)</button>
+        <button class="btn btn-blue" onclick="triggerImport()">📥 استيراد JSON</button>
+        <button class="btn btn-yellow" onclick="openChangePw()">🔑 تغيير الباسورد</button>
+        <button class="btn btn-purple" onclick="openAddHotel()">🏨 إضافة فندق</button>
+      </div>
+      <p class="tools-hint">💡 استورد ملف الأسعار من الأوبريشن لتحديث الأسعار تلقائياً</p>
+    </div>
+    <div class="danger-zone">
+      <p class="danger-title">⚠️ منطقة الخطر</p>
+      <button class="btn btn-red" style="font-size:13px;padding:10px 18px" onclick="confirmReset()">🔄 إعادة تعيين كل البيانات</button>
+      <p style="font-size:11px;color:var(--text3);margin-top:8px">يحذف جميع الأسعار والفنادق المضافة</p>
+    </div>
+    <p class="sec-label">① اختر المنطقة</p>
+    <div class="pills" style="margin-bottom:14px">${pillsHtml}</div>
+    <p class="sec-label">② اختر الفندق</p>
+    <div class="field" style="margin-bottom:14px">
+      <select class="inp" id="aHotel" onchange="aHotelId=this.value;aExpanded={};renderAdmin()">${hotelOpts}</select>
+    </div>
+    ${hotelContent}`;
+  if(aHotelId!=='')document.getElementById('aHotel').value=String(aHotelId);
+}
+
+function toggleRoom(key){aExpanded[key]=!aExpanded[key];renderAdmin();}
+
+function ensureRoom(hid,ri){
+  if(!DB[hid])DB[hid]={};
+  if(!DB[hid][ri]){const h=HOTELS.find(x=>x.id==hid);DB[hid][ri]={periods:[],notes:h?h.notes:''};}
+}
+function addPeriod(hid,ri){
+  ensureRoom(hid,ri);
+  DB[hid][ri].periods.push({id:Date.now(),label:'',from:'',to:'',price:'',priceTo:''});
+  save();renderAdmin();
+}
+function deletePeriod(hid,ri,pi){
+  ensureRoom(hid,ri);
+  DB[hid][ri].periods.splice(pi,1);
+  save();renderAdmin();
+}
+function updatePeriodField(hid,ri,pi,field,val){
+  ensureRoom(hid,ri);
+  DB[hid][ri].periods[pi][field]=val;
+  save();
+  const p=DB[hid][ri].periods[pi];
+  const cards=document.querySelectorAll('.period-card');
+  if(cards[pi]){
+    const prev=cards[pi].querySelector('.period-preview');
+    if(p.from&&p.to&&p.price){
+      const txt=`✦ ${p.from} → ${p.to} | ${p.price}${p.priceTo?' – '+p.priceTo:''}$`;
+      if(prev){prev.textContent=txt;}else{const d=document.createElement('div');d.className='period-preview';d.textContent=txt;cards[pi].appendChild(d);}
+    }else if(prev){prev.remove();}
+  }
+}
+function updateNotes(hid,val){
+  if(!DB[hid])DB[hid]={};
+  DB[hid].__notes=val;
+  save();showToast('✓ تم الحفظ','green');
+}
+
+// ══════════════════════════════════════════════════
+// BOOKING RECORDS SYSTEM
+// ══════════════════════════════════════════════════
+const BOOKINGS_KEY='hotel_sales_bookings_v1';
+let BOOKINGS=[];
+
+function loadBookings(){
+  try{const r=localStorage.getItem(BOOKINGS_KEY);if(r)BOOKINGS=JSON.parse(r);}catch(e){BOOKINGS=[];}
+}
+function saveBookings(){localStorage.setItem(BOOKINGS_KEY,JSON.stringify(BOOKINGS));}
+
+function saveBookingRecord(){
+  const hotel=HOTELS.find(x=>x.id==cHotelId)||HOTELS.find(x=>x.id===parseInt(cHotelId));
+  if(!hotel)return;
+  const rd=getRoomData(hotel.id,parseInt(cRoomIdx));
+  const res=calcBooking(rd.periods||[],cCheckIn,cCheckOut);
+  if(!res||res.breakdown.length===0){showToast('لا يوجد سعر لحفظه','red');return;}
+  const hasRange=res.breakdown.some(b=>b.range);
+  const rawMin=hasRange?res.breakdown.reduce((s,b)=>s+b.n*b.price,0):res.total;
+  const rawMax=hasRange?res.breakdown.reduce((s,b)=>s+b.n*(b.priceTo||b.price),0):res.total;
+  const egpRate=parseFloat(localStorage.getItem('egp_rate')||'50'); // kept for legacy data only
+  let commUsdMin=0,commUsdMax=0,commPerNightUsd=0,commDisplay='';
+  if(cCommission>0){
+    if(cCommType==='pct'){
+      commUsdMin=rawMin*(cCommission/100);
+      commUsdMax=rawMax*(cCommission/100);
+      commPerNightUsd=rawMin/res.nights*(cCommission/100);
+      commDisplay=cCommission+'%';
+    } else if(cCommType==='usd'){
+      commUsdMin=cCommission*res.nights;
+      commUsdMax=cCommission*res.nights;
+      commPerNightUsd=cCommission;
+      commDisplay=fmtAmt(cCommission)+'$/ليلة';
+    } else {
+      // EGP: store as EGP total (commUsdMin/Max variables repurposed for EGP)
+      commUsdMin=cCommission*res.nights;
+      commUsdMax=cCommission*res.nights;
+      commPerNightUsd=cCommission; // EGP per night
+      commDisplay=fmtAmt(cCommission)+' ج.م/ليلة';
+    }
+  }
+  const rec={
+    id:'bk_'+Date.now(),
+    savedAt:new Date().toISOString(),
+    client:cClient,
+    hotelId:hotel.id,
+    hotelName:hotel.name,
+    region:hotel.region,
+    roomIdx:parseInt(cRoomIdx),
+    roomName:hotel.rooms[parseInt(cRoomIdx)].n,
+    checkIn:cCheckIn,
+    checkOut:cCheckOut,
+    nights:res.nights,
+    commission:cCommission,
+    commissionType:cCommType||'pct',
+    commissionDisplay:commDisplay,
+    commUsdMin,commUsdMax,
+    commPerNightUsd,
+    rawMin,rawMax,
+    totalMin:rawMin,
+    totalMax:rawMax,
+    hasRange,
+    breakdown:res.breakdown,
+    status:'confirmed'
+  };
+  BOOKINGS.unshift(rec);
+  saveBookings();
+  showToast('✓ تم حفظ الحجز في التقارير','green');
+  const btn=document.getElementById('saveBookingBtn');
+  if(btn){btn.textContent='✓ تم الحفظ!';btn.disabled=true;setTimeout(()=>{btn.textContent='💾 حفظ الحجز';btn.disabled=false;},2500);}
+}
+
+function deleteBooking(id){
+  BOOKINGS=BOOKINGS.filter(b=>b.id!==id);
+  saveBookings();
+  renderReports();
+  showToast('تم حذف الحجز','orange');
+}
+
+function updateBookingStatus(id,status){
+  const b=BOOKINGS.find(x=>x.id===id);
+  if(b){b.status=status;saveBookings();renderReports();}
+}
+
+// ══════════════════════════════════════════════════
+// REPORTS PAGE
+// ══════════════════════════════════════════════════
+let rFilter='all', rSearch='', rSort='date_desc';
+
+function renderReports(){
+  loadBookings();
+  const statusColors={confirmed:'rgba(20,83,45,0.4)',pending:'rgba(120,53,15,0.4)',cancelled:'rgba(127,29,29,0.4)'};
+  const statusBorder={confirmed:'rgba(34,197,94,0.4)',pending:'rgba(234,179,8,0.4)',cancelled:'rgba(248,113,113,0.4)'};
+  const statusText={confirmed:'#86efac',pending:'#fde68a',cancelled:'#fca5a5'};
+  const statusLabel={confirmed:'✅ مؤكد',pending:'⏳ معلق',cancelled:'❌ ملغي'};
+  const active=BOOKINGS.filter(b=>b.status!=='cancelled');
+  const total=BOOKINGS.length;
+  const confirmed=BOOKINGS.filter(b=>b.status==='confirmed').length;
+  const pending=BOOKINGS.filter(b=>b.status==='pending').length;
+  const cancelled=BOOKINGS.filter(b=>b.status==='cancelled').length;
+  const totalRevMin=active.reduce((s,b)=>s+(b.rawMin||b.totalMin||0),0);
+  const totalNights=active.reduce((s,b)=>s+b.nights,0);
+  const totalCommMin=active.reduce((s,b)=>s+(b.commUsdMin||0),0);
+  const totalCommMax=active.reduce((s,b)=>s+(b.commUsdMax||b.commUsdMin||0),0);
+  const hasCommData=active.some(b=>b.commission>0&&(b.commUsdMin||0)>0);
+  const allEgp=hasCommData&&active.filter(b=>b.commission>0).every(b=>b.commissionType==='egp');
+  const commCurrency=allEgp?' ج.م':'$';
+  let list=[...BOOKINGS];
+  if(rFilter!=='all')list=list.filter(b=>b.status===rFilter);
+  if(rSearch.trim()){const q=rSearch.trim().toLowerCase();list=list.filter(b=>b.client.toLowerCase().includes(q)||b.hotelName.toLowerCase().includes(q)||b.roomName.toLowerCase().includes(q));}
+  if(rSort==='date_asc')list.sort((a,b)=>a.savedAt.localeCompare(b.savedAt));
+  else if(rSort==='date_desc')list.sort((a,b)=>b.savedAt.localeCompare(a.savedAt));
+  else if(rSort==='amount_desc')list.sort((a,b)=>b.totalMin-a.totalMin);
+  else if(rSort==='amount_asc')list.sort((a,b)=>a.totalMin-b.totalMin);
+  else if(rSort==='nights_desc')list.sort((a,b)=>b.nights-a.nights);
+  let cardsHtml='';
+  if(list.length===0){
+    cardsHtml=`<div class="empty"><span>📋</span><p>لا توجد حجوزات</p><small>${BOOKINGS.length===0?'احسب حجزاً وحدد "حفظ الحجز" لإضافته هنا':'لا توجد نتائج تطابق البحث'}</small></div>`;
+  } else {
+    list.forEach(b=>{
+      const d=new Date(b.savedAt);
+      const dateStr=d.toLocaleDateString('ar-EG',{year:'numeric',month:'short',day:'numeric'});
+      const timeStr=d.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+      const rawMin=b.rawMin||b.totalMin||0;const rawMax=b.rawMax||b.totalMax||rawMin;
+      const amtStr=b.hasRange?fmtAmt(rawMin)+'$ – '+fmtAmt(rawMax)+'$':fmtAmt(rawMin)+'$';
+      const hasComm=b.commission>0&&(b.commUsdMin||0)>0;
+      const commMin=b.commUsdMin||0;const commMax=b.commUsdMax||commMin;
+      const isEgp=b.commissionType==='egp';
+      const commStr=hasComm?(commMin===commMax?fmtAmt(commMin)+(isEgp?' ج.م':'$'):fmtAmt(commMin)+(isEgp?' ج.م':'$ – ')+fmtAmt(commMax)+(isEgp?' ج.م':'$')):'';
+      const perNightStr=isEgp?fmtAmt(b.commPerNightUsd||0)+' ج.م':fmtAmt(b.commPerNightUsd||0)+'$';      cardsHtml+=`<div style="background:var(--bg2);border:1px solid ${statusBorder[b.status]};border-radius:18px;padding:16px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:16px;font-weight:900;color:#fef08a;margin-bottom:2px">${esc(b.client)}</div>
+            <div style="font-size:12px;color:var(--text2);font-weight:700">${esc(b.hotelName)}</div>
+            <div style="font-size:11px;color:var(--text3)">${esc(b.roomName)}</div>
+          </div>
+          <div style="text-align:left;flex-shrink:0">
+            <div style="font-size:18px;font-weight:900;color:#fde68a">${amtStr}</div>
+            <div style="font-size:10px;color:var(--text3);text-align:center">${b.nights} ليلة</div>
+          </div>
+        </div>
+        ${hasComm?`<div style="background:rgba(20,83,45,0.2);border:1px solid rgba(34,197,94,0.4);border-radius:10px;padding:9px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:10px;font-weight:900;color:#86efac;letter-spacing:1px">💼 عمولتي (${esc(b.commissionDisplay||'')})</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:2px">${perNightStr}/ليلة × ${b.nights} ليلة</div>
+          </div>
+          <div style="font-size:18px;font-weight:900;color:#4ade80">${commStr}</div>
+        </div>`:''}
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+          <span class="chip">📅 ${formatAr(b.checkIn)}</span>
+          <span class="chip">📅 ${formatAr(b.checkOut)}</span>
+          <span class="chip chip-gold">🌙 ${b.nights} ليلة</span>
+          <span style="display:inline-flex;align-items:center;background:${statusColors[b.status]};border:1px solid ${statusBorder[b.status]};color:${statusText[b.status]};border-radius:999px;padding:4px 12px;font-size:11px;font-weight:700">${statusLabel[b.status]}</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+          <select style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:10px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;outline:none;direction:rtl" onchange="updateBookingStatus('${b.id}',this.value)">
+            <option value="confirmed"${b.status==='confirmed'?' selected':''}>✅ مؤكد</option>
+            <option value="pending"${b.status==='pending'?' selected':''}>⏳ معلق</option>
+            <option value="cancelled"${b.status==='cancelled'?' selected':''}>❌ ملغي</option>
+          </select>
+          <button class="btn btn-green" style="padding:5px 12px;font-size:11px" onclick="copyBookingById('${b.id}')">📋 نسخ</button>
+          <button class="btn btn-red" style="padding:5px 12px;font-size:11px" onclick="deleteBooking('${b.id}')">🗑 حذف</button>
+          <span style="font-size:10px;color:var(--text3);margin-right:auto">${dateStr} ${timeStr}</span>
+        </div>
+      </div>`;
+    });
+  }
+  const monthlyMap={};
+  BOOKINGS.filter(b=>b.status!=='cancelled').forEach(b=>{const m=b.checkIn?b.checkIn.slice(0,7):'';if(!m)return;if(!monthlyMap[m])monthlyMap[m]={rev:0,comm:0};monthlyMap[m].rev+=(b.rawMin||b.totalMin||0);monthlyMap[m].comm+=(b.commUsdMin||0);});
+  const months=Object.keys(monthlyMap).sort().slice(-6);
+  const maxRev=Math.max(...months.map(m=>monthlyMap[m].rev),1);
+  let chartHtml='';
+  if(months.length>0){chartHtml=`<div style="background:var(--bg2);border:1px solid var(--border-gold);border-radius:16px;padding:16px;margin-bottom:14px"><p class="sec-label" style="margin-bottom:12px">📈 الإيرادات الشهرية (آخر 6 أشهر)</p><div style="display:flex;align-items:flex-end;gap:8px;height:100px">${months.map(m=>{const pct=monthlyMap[m].rev/maxRev*100;return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="font-size:9px;color:var(--text3);font-weight:700">${fmtAmt(monthlyMap[m].rev)}$</div><div style="width:100%;background:linear-gradient(to top,#a16207,#eab308);border-radius:6px 6px 0 0;height:${Math.max(pct,4)}%"></div><div style="font-size:9px;color:var(--text3);white-space:nowrap">${m}</div></div>`;}).join('')}</div></div>`;}
+  const commBox=hasCommData?`<div style="background:rgba(20,83,45,0.25);border:2px solid rgba(34,197,94,0.5);border-radius:14px;padding:14px 16px;margin-bottom:14px"><p class="sec-label" style="color:#86efac;margin-bottom:10px">💼 إجمالي عمولاتي</p><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div><div style="font-size:11px;color:var(--text3)">من الحجوزات المؤكدة والمعلقة</div><div style="font-size:11px;color:var(--text3);margin-top:3px">إجمالي الحجوزات: <span style="color:#fde68a;font-weight:700">${fmtAmt(totalRevMin)}$</span></div></div><div style="text-align:left"><div style="font-size:28px;font-weight:900;color:#4ade80">${totalCommMin===totalCommMax?fmtAmt(totalCommMin)+commCurrency:fmtAmt(totalCommMin)+commCurrency+' – '+fmtAmt(totalCommMax)+commCurrency}</div><div style="font-size:10px;color:var(--text3);text-align:center">صافي عمولاتي</div></div></div></div>`:'';
+  document.getElementById('pageReports').innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px">
+      <div style="background:var(--bg2);border:1px solid rgba(34,197,94,0.3);border-radius:14px;padding:12px;text-align:center">
+        <div style="font-size:26px;font-weight:900;color:#86efac">${total}</div>
+        <div style="font-size:10px;color:var(--text3);font-weight:700">إجمالي الحجوزات</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid rgba(234,179,8,0.3);border-radius:14px;padding:12px;text-align:center">
+        <div style="font-size:18px;font-weight:900;color:#fde68a">${fmtAmt(totalRevMin)}$</div>
+        <div style="font-size:10px;color:var(--text3);font-weight:700">إجمالي الحجوزات $</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid rgba(96,165,250,0.3);border-radius:14px;padding:12px;text-align:center">
+        <div style="font-size:26px;font-weight:900;color:#93c5fd">${totalNights}</div>
+        <div style="font-size:10px;color:var(--text3);font-weight:700">إجمالي الليالي</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid rgba(34,197,94,0.4);border-radius:14px;padding:12px;text-align:center">
+        <div style="font-size:18px;font-weight:900;color:#4ade80">${hasCommData?fmtAmt(totalCommMin)+commCurrency:'—'}</div>
+        <div style="font-size:10px;color:var(--text3);font-weight:700">إجمالي عمولاتي</div>
+      </div>
+    </div>
+    ${commBox}${chartHtml}
+    <div style="background:var(--bg2);border:1px solid var(--border-gold);border-radius:14px;padding:12px;margin-bottom:14px">
+      <div class="grid2" style="margin-bottom:8px">
+        <div class="field" style="margin-bottom:0"><label>🔍 بحث</label><input class="inp" type="text" placeholder="عميل، فندق، غرفة..." value="${esc(rSearch)}" oninput="rSearch=this.value;renderReports()" style="padding:10px 14px;font-size:13px"></div>
+        <div class="field" style="margin-bottom:0"><label>ترتيب حسب</label><select class="inp" style="padding:10px 14px;font-size:13px" onchange="rSort=this.value;renderReports()">
+          <option value="date_desc"${rSort==='date_desc'?' selected':''}>📅 الأحدث أولاً</option>
+          <option value="date_asc"${rSort==='date_asc'?' selected':''}>📅 الأقدم أولاً</option>
+          <option value="amount_desc"${rSort==='amount_desc'?' selected':''}>💰 الأعلى سعراً</option>
+          <option value="amount_asc"${rSort==='amount_asc'?' selected':''}>💰 الأقل سعراً</option>
+          <option value="nights_desc"${rSort==='nights_desc'?' selected':''}>🌙 أطول إقامة</option>
+        </select></div>
+      </div>
+      <div class="pills" style="margin-bottom:0">
+        <button class="pill${rFilter==='all'?' active':''}" onclick="rFilter='all';renderReports()">الكل (${total})</button>
+        <button class="pill${rFilter==='confirmed'?' active':''}" onclick="rFilter='confirmed';renderReports()">✅ مؤكد (${confirmed})</button>
+        <button class="pill${rFilter==='pending'?' active':''}" onclick="rFilter='pending';renderReports()">⏳ معلق (${pending})</button>
+        <button class="pill${rFilter==='cancelled'?' active':''}" onclick="rFilter='cancelled';renderReports()">❌ ملغي (${cancelled})</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <button class="btn btn-green" style="flex:1;justify-content:center;font-size:12px;padding:10px" onclick="exportBookingsJSON()">📤 تصدير JSON</button>
+      <button class="btn btn-blue" style="flex:1;justify-content:center;font-size:12px;padding:10px" onclick="exportBookingsCSV()">📊 تصدير CSV</button>
+      <button class="btn btn-yellow" style="flex:1;justify-content:center;font-size:12px;padding:10px" onclick="exportBookingsPrint()">🖨 طباعة</button>
+      ${BOOKINGS.length>0?`<button class="btn btn-red" style="font-size:12px;padding:10px" onclick="if(confirm('حذف جميع الحجوزات؟')){BOOKINGS=[];saveBookings();renderReports();}">🗑 مسح الكل</button>`:''}
+    </div>
+    <div style="background:rgba(30,58,138,0.2);border:1px solid rgba(96,165,250,0.25);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:11px;color:#93c5fd;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+      <span>📦 لتحديث الأسعار: احصل على ملف JSON من الأوبريشن واستورده</span>
+      <button class="btn" style="background:rgba(30,58,138,0.5);border:1px solid rgba(96,165,250,0.4);color:#93c5fd;font-size:11px;padding:5px 12px" onclick="triggerImportOps()">📥 استيراد أسعار جديدة</button>
+    </div>
+    <p class="sec-label" style="margin-bottom:8px">سجل مبيعاتي (${list.length})</p>
+    ${cardsHtml}`;
+}
+
+function copyBookingById(id){
+  const b=BOOKINGS.find(x=>x.id===id);if(!b)return;
+  const rawMin=b.rawMin||b.totalMin||0;const rawMax=b.rawMax||b.totalMax||rawMin;
+  let txt=`📋 تفاصيل الحجز\n━━━━━━━━━━━━━━━━━\n`;
+  txt+=`👤 العميل: ${b.client}\n🏨 الفندق: ${b.hotelName}\n🛏 الغرفة: ${b.roomName}\n`;
+  txt+=`📅 الدخول: ${formatAr(b.checkIn)}\n📅 المغادرة: ${formatAr(b.checkOut)}\n🌙 عدد الليالي: ${b.nights}\n`;
+  txt+=`━━━━━━━━━━━━━━━━━\n💰 تفصيل الأسعار:\n`;
+  (b.breakdown||[]).forEach(br=>{txt+=`  • ${br.lbl||''}: ${br.n} ليلة × ${br.range?fmtAmt(br.price)+'$–'+fmtAmt(br.priceTo)+'$':fmtAmt(br.price)+'$'} = ${br.range?fmtAmt(br.n*br.price)+'$–'+fmtAmt(br.n*(br.priceTo||br.price))+'$':fmtAmt(br.sub)+'$'}\n`;});
+  txt+=`━━━━━━━━━━━━━━━━━\n✅ الإجمالي: ${b.hasRange?fmtAmt(rawMin)+'$ – '+fmtAmt(rawMax)+'$':fmtAmt(rawMin)+'$'}\n`;
+  iosClipboard(txt,()=>showToast('✓ تم النسخ!','green'));
+}
+
+function exportBookingsJSON(){
+  const blob=new Blob([JSON.stringify({exportDate:new Date().toISOString(),bookings:BOOKINGS},null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='hotel-bookings-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);showToast('✓ تم التصدير!','green');
+}
+
+function exportBookingsCSV(){
+  const hdr='ID,العميل,الفندق,المنطقة,الغرفة,الدخول,المغادرة,الليالي,إجمالي الحجز,نوع العمولة,عمولة$,الحالة,تاريخ الحفظ\n';
+  const rows=BOOKINGS.map(b=>{
+    const raw=b.rawMin||b.totalMin||0;const rawMax=b.rawMax||b.totalMax||raw;
+    const rawStr=b.hasRange?fmtAmt(raw)+'–'+fmtAmt(rawMax):fmtAmt(raw);
+    const commStr=(b.commUsdMin||0)>0?(()=>{const isEgp=b.commissionType==='egp';const cur=isEgp?' ج.م':'';return fmtAmt(b.commUsdMin)+(b.commUsdMax!==b.commUsdMin?'–'+fmtAmt(b.commUsdMax):'')+cur;})():'0';
+    return[b.id,b.client,b.hotelName,b.region||'',b.roomName,b.checkIn,b.checkOut,b.nights,rawStr,b.commissionDisplay||'',commStr,b.status,b.savedAt].map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',');
+  }).join('\n');
+  const blob=new Blob(['\uFEFF'+hdr+rows],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='hotel-bookings-'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);showToast('✓ تم تصدير CSV!','green');
+}
+
+function exportBookingsPrint(){
+  try{
+    const activeB=BOOKINGS.filter(b=>b.status!=='cancelled');
+    const totalRev=activeB.reduce((s,b)=>s+(b.rawMin||b.totalMin||0),0);
+    const totalComm=activeB.reduce((s,b)=>s+(b.commUsdMin||0),0);
+    const hasCommData=activeB.some(b=>(b.commUsdMin||0)>0);
+    const rows=BOOKINGS.map((b,i)=>{
+      const raw=b.rawMin||b.totalMin||0;const rawMax=b.rawMax||b.totalMax||raw;
+      const rawStr=b.hasRange?fmtAmt(raw)+'$ – '+fmtAmt(rawMax)+'$':fmtAmt(raw)+'$';
+      const commStr=(b.commUsdMin||0)>0?(()=>{const isEgp=b.commissionType==='egp';const cur=isEgp?' ج.م':'$';return fmtAmt(b.commUsdMin)+(b.commUsdMax!==b.commUsdMin?' – '+fmtAmt(b.commUsdMax):'')+cur;})():'—';
+      const stMap={confirmed:'✅ مؤكد',pending:'⏳ معلق',cancelled:'❌ ملغي'};
+      return'<tr><td>'+(i+1)+'</td><td>'+(b.client||'')+'</td><td>'+(b.hotelName||'')+'</td><td>'+(b.roomName||'')+'</td><td>'+(b.checkIn||'')+'</td><td>'+(b.checkOut||'')+'</td><td>'+(b.nights||0)+'</td><td>'+rawStr+'</td><td>'+(b.commissionDisplay||'—')+'</td><td style="color:#166534;font-weight:bold">'+commStr+'</td><td>'+(stMap[b.status]||b.status)+'</td></tr>';
+    }).join('');
+    const html='<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>تقرير المبيعات</title>'
+      +'<style>body{font-family:Arial,sans-serif;direction:rtl;padding:20px;color:#111}h1{color:#a16207;border-bottom:2px solid #eab308;padding-bottom:8px}table{width:100%;border-collapse:collapse;margin-top:16px}th{background:#a16207;color:#fff;padding:8px 10px;font-size:11px}td{border:1px solid #ddd;padding:6px 9px;font-size:11px}tr:nth-child(even){background:#fafafa}.tot{margin-top:14px;font-size:15px;font-weight:bold;color:#a16207}.comm{color:#166534}@media print{button{display:none}}</style></head>'
+      +'<body><h1>💼 تقرير المبيعات — الحجوزات</h1>'
+      +'<p style="color:#666;font-size:12px">تاريخ الطباعة: '+new Date().toLocaleDateString('ar-EG',{year:'numeric',month:'long',day:'numeric'})+'</p>'
+      +'<table><thead><tr><th>#</th><th>العميل</th><th>الفندق</th><th>الغرفة</th><th>الدخول</th><th>المغادرة</th><th>الليالي</th><th>إجمالي الحجز</th><th>نوع العمولة</th><th>العمولة $</th><th>الحالة</th></tr></thead><tbody>'+rows+'</tbody></table>'
+      +'<p class="tot">إجمالي الحجوزات (المؤكد + المعلق): '+fmtAmt(totalRev)+'$</p>'
+      +(hasCommData?'<p class="tot comm">إجمالي عمولاتي: '+fmtAmt(totalComm)+'$</p>':'')
+      +'<br><button onclick="window.print()" style="background:#a16207;color:#fff;border:none;padding:10px 24px;border-radius:8px;cursor:pointer;font-size:14px">🖨 طباعة</button>'
+      +'</body></html>';
+    const win=window.open('','_blank');
+    if(!win){showToast('❌ السماح بالنوافذ المنبثقة لفتح الطباعة','red');return;}
+    win.document.open();win.document.write(html);win.document.close();
+  }catch(e){showToast('❌ خطأ في الطباعة: '+e.message,'red');}
+}
+
+function exportForSales(){
+  // Build a clean export: prices + hotels only, no bookings, no admin pw
+  const salesPayload={
+    version:'sales_1.0',
+    exportDate:new Date().toISOString(),
+    exportedBy:'operations',
+    appName:'نسخة المبيعات — أسعار الفنادق',
+    data:DB,
+    customHotels:customHotels,
+    hotelRooms:hotelRooms
+  };
+  const blob=new Blob([JSON.stringify(salesPayload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='sales-prices-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  showToast('✓ تم تصدير ملف المبيعات! ارفعه على نسخة المبيعات','green');
+}
+
+// ══════════════════════════════════════════════════
+// FIREBASE REST API SYNC — works on ALL devices
+// including iOS Safari from file:// (no WebSocket needed)
+// ══════════════════════════════════════════════════
+const FB_DB_URL='https://my-first-app-cafc4-default-rtdb.firebaseio.com';
+const POLL_INTERVAL=30000;
+
+let lastAppliedTimestamp=0;
+let fbReady=false;
+let pollTimer=null;
+let retryCount=0;
+const MAX_RETRY_DELAY=60000;
+
+function initFirebase(){
+  updateSyncBanner('syncing','جاري تحميل الأسعار...');
+  retryCount=0;
+  fetchPrices();
+}
+
+function getRetryDelay(){
+  return Math.min(5000*Math.pow(2,retryCount), MAX_RETRY_DELAY);
+}
+
+function onFetchSuccess(data){
+  retryCount=0;
+  if(!data){
+    updateSyncBanner('connected','متصل — لا توجد أسعار بعد');
+    fbReady=true;
+    schedulePoll();
+    return;
+  }
+  applyPrices(data);
+}
+
+function onFetchFail(reason){
+  const delay=getRetryDelay();
+  retryCount++;
+  const secs=Math.round(delay/1000);
+  updateSyncBanner('offline', reason+' — إعادة المحاولة خلال '+secs+'ث');
+  scheduleRetry(delay);
+}
+
+function fetchPrices(){
+  const url=FB_DB_URL+'/prices.json?t='+Date.now();
+  // Try modern fetch() first, fall back to XHR
+  if(window.fetch){
+    const controller=typeof AbortController!=='undefined'?new AbortController():null;
+    const timeoutId=controller?setTimeout(()=>controller.abort(),15000):null;
+    fetch(url,controller?{signal:controller.signal,cache:'no-store'}:{cache:'no-store'})
+      .then(function(res){
+        if(timeoutId)clearTimeout(timeoutId);
+        if(!res.ok)throw new Error('HTTP '+res.status);
+        return res.json();
+      })
+      .then(function(data){
+        onFetchSuccess(data);
+      })
+      .catch(function(){
+        if(timeoutId)clearTimeout(timeoutId);
+        fetchPricesXHR(); // fallback
+      });
+  } else {
+    fetchPricesXHR();
+  }
+}
+
+function fetchPricesXHR(){
+  const url=FB_DB_URL+'/prices.json?t='+Date.now();
+  const xhr=new XMLHttpRequest();
+  xhr.open('GET',url,true);
+  xhr.timeout=15000;
+  xhr.onload=function(){
+    if(xhr.status>=200&&xhr.status<300){
+      try{
+        const data=JSON.parse(xhr.responseText);
+        onFetchSuccess(data);
+      }catch(e){
+        updateSyncBanner('error','خطأ في قراءة البيانات');
+        scheduleRetry();
+      }
+    }else{
+      onFetchFail('خطأ في الاتصال ('+xhr.status+')');
+    }
+  };
+  xhr.onerror=function(){
+    onFetchFail('لا يوجد اتصال بالإنترنت');
+  };
+  xhr.ontimeout=function(){
+    onFetchFail('انتهت مهلة الاتصال');
+  };
+  xhr.send();
+}
+
+function applyPrices(data){
+  try{
+    const ts=data.updatedAt||0;
+    const isFirstLoad=!fbReady;
+    // Skip if same data
+    if(ts>0 && ts===lastAppliedTimestamp){
+      fbReady=true;
+      schedulePoll();
+      return;
+    }
+    lastAppliedTimestamp=ts;
+    fbReady=true;
+
+    DB=data.data||data;
+    if(Object.prototype.hasOwnProperty.call(data,'customHotels')) customHotels=data.customHotels||[];
+    if(Object.prototype.hasOwnProperty.call(data,'hotelRooms'))   hotelRooms=data.hotelRooms||{};
+    rebuildHotels();
+
+    const timeLabel=new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+    updateSyncBanner('connected','✓ أسعار محدّثة — '+timeLabel);
+
+    // Make sure pageCalc is visible before rendering
+    const pc=document.getElementById('pageCalc');
+    if(pc&&pc.style.display==='none')pc.style.display='block';
+    renderCalc();
+    const pr=document.getElementById('pageReports');
+    if(pr&&pr.style.display!=='none') renderReports();
+
+    if(!isFirstLoad && document.visibilityState==='visible'){
+      showToast('🔄 تم تحديث الأسعار','green');
+    }
+    schedulePoll();
+  }catch(e){
+    console.warn('applyPrices error:',e);
+    updateSyncBanner('error','خطأ في تطبيق الأسعار');
+    schedulePoll();
+  }
+}
+
+function schedulePoll(){
+  clearTimeout(pollTimer);
+  pollTimer=setTimeout(fetchPrices, POLL_INTERVAL);
+}
+
+function scheduleRetry(delay){
+  clearTimeout(pollTimer);
+  pollTimer=setTimeout(fetchPrices, delay||10000);
+}
+
+// Manual refresh button
+function manualRefresh(){
+  clearTimeout(pollTimer);
+  updateSyncBanner('syncing','جاري التحديث...');
+  fetchPrices();
+}
+
+// Re-fetch when tab becomes visible again
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'){
+    clearTimeout(pollTimer);
+    fetchPrices();
+  }
+});
+
+function updateSyncBanner(state,msg){
+  const dot=document.getElementById('fbDot');
+  const lbl=document.getElementById('fbLabel');
+  if(!dot||!lbl)return;
+  const colors={connected:'#4ade80',syncing:'#fde68a',offline:'#f87171',error:'#f87171'};
+  const c=colors[state]||'#9ca3af';
+  dot.style.background=c;
+  dot.style.boxShadow='0 0 7px '+c+'99';
+  lbl.textContent=msg;
+}
+
+// ══════════════════════════════════════════════════
+// INIT — deferred to ensure DOM is fully ready on all devices
+// ══════════════════════════════════════════════════
+function appInit(){
+  document.getElementById('yr').textContent=new Date().getFullYear();
+  // Init state
+  HOTELS=[...BASE_HOTELS];
+  DB=buildFresh();
+  loadBookings();
+  // Ensure pageCalc is visible
+  const pc=document.getElementById('pageCalc');
+  const pr=document.getElementById('pageReports');
+  if(pc){pc.style.display='block';}
+  if(pr){pr.style.display='none';}
+  // Render
+  renderCalc();
+  // Fetch prices from Firebase REST API
+  setTimeout(initFirebase,300);
+}
+
+// Use DOMContentLoaded for safety — guarantees DOM ready on all browsers/iOS
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded', appInit);
+} else {
+  appInit();
+}
+</script>
+</body>
+</html>
